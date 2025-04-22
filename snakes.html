@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Snake Game with Two Snakes and Extra Features</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Snake Game: Human vs. AI" />
+  <meta property="og:description" content="Control Human in a fun snake game, dodge the moving cannon, and compete with AI Player!" />
+  <meta property="og:image" content="logo.png" />
+  <meta property="og:image:width" content="607" />
+  <meta property="og:image:height" content="607" />
+  <meta property="og:url" content="snakes.html" />
+  <meta property="og:type" content="game" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/addons/p5.sound.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #37474F;
+      color: white;
+      touch-action: manipulation;
+    }
+    canvas {
+      border: 3px solid transparent;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      max-width: 90vw;
+      max-height: 90vw;
+    }
+    #startButton, #restartButton, #resetButton {
+      margin: 10px 0;
+      padding: 10px 20px;
+      font-size: clamp(14px, 4vw, 16px);
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      touch-action: manipulation;
+    }
+    #muteButton {
+      margin: 10px 0;
+      padding: 10px 20px;
+      font-size: clamp(14px, 4vw, 16px);
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      display: block;
+    }
+    #startButton:hover, #restartButton:hover, #resetButton:hover, #muteButton:hover {
+      background-color: #45a049;
+    }
+    #restartButton {
+      display: none;
+    }
+    #modeSelect {
+      margin: 10px 0;
+      padding: 10px;
+      font-size: clamp(14px, 4vw, 16px);
+      border-radius: 5px;
+    }
+    #controls {
+      display: none;
+      margin-top: 10px;
+      gap: 10px;
+    }
+    .control-button {
+      width: clamp(40px, 12vw, 60px);
+      height: clamp(40px, 12vw, 60px);
+      font-size: clamp(16px, 5vw, 24px);
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .control-button:hover {
+      background-color: #1976D2;
+    }
+    .control-button:active {
+      background-color: #1565C0;
+    }
+    @media (max-width: 600px) {
+      #controls {
+        display: grid;
+        grid-template-areas:
+          ". up ."
+          "left center right"
+          ". down .";
+        grid-gap: 5px;
+      }
+      #up { grid-area: up; }
+      #left { grid-area: left; }
+      #right { grid-area: right; }
+      #down { grid-area: down; }
+    }
+
+    .controls-table {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px auto;
+      align-items: center;
+      font-family: sans-serif;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #modeSelect, #AIspeedSelect, #GameSpeedSelect, #NumberOfObstaclesSelect {
+      margin: 10px 0;
+      padding: 10px;
+      font-size: clamp(14px, 4vw, 16px);
+      background-color: #37474F;
+      color: #E8ECEF;
+      border: 1px solid #546E7A;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    #modeSelect:hover, #AIspeedSelect:hover, #GameSpeedSelect:hover, #NumberOfObstaclesSelect:hover, #WinScoreInput:hover {
+      background-color: #455A64;
+    }
+    #WinScoreInput {
+      margin: 10px 0;
+      padding: 10px;
+      font-size: clamp(14px, 4vw, 16px);
+      background-color: #37474F;
+      color: #E8ECEF;
+      border: 1px solid #546E7A;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      width: 8ch;
+    }
+    #startButton,
+    #muteButton,
+    #restartButton, #resetButton {
+      padding: 10px 20px;
+      font-size: clamp(14px, 4vw, 16px);
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #muteButton {
+      background-color: #ff9800;
+    }
+
+    #restartButton, #resetButton {
+      background-color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <!-- Controls Table -->
+  <div id="controlsTable" class="controls-table">
+    <div class="controls-row">
+      <label for="modeSelect">Mode:</label>
+      <select id="modeSelect" onchange="updateGameMode()">
+        <option value="playerVsAI">Player vs AI</option>
+        <option value="AIVsAI">AI vs AI</option>
+      </select>
+      <label for="AIspeedSelect">AI Speed:</label>
+      <select id="AIspeedSelect" onchange="updateAISpeed()">
+        <option value="6">Zombi</option>
+        <option value="5">Stoned</option>
+        <option value="4">Slowest</option>
+        <option value="3">Slower</option>
+        <option value="2" selected>Normal</option>
+        <option value="1">Fast</option>
+        <option value="0">Faster</option>
+      </select>
+      <label for="GameSpeedSelect">Game Speed:</label>
+      <select id="GameSpeedSelect" onchange="updateGameSpeed()">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">21</option>
+        <option value="22">22</option>
+        <option value="23">23</option>
+        <option value="24">24</option>
+        <option value="25">25</option>
+        <option value="26">26</option>
+        <option value="27">27</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+        <option value="32">32</option>
+        <option value="33">33</option>
+        <option value="34">34</option>
+        <option value="35">35</option>
+        <option value="36">36</option>
+        <option value="37">37</option>
+        <option value="38">38</option>
+        <option value="39">39</option>
+        <option value="40">40</option>
+      </select>
+      <label for="NumberOfObstaclesSelect">Obstacles:</label>
+      <select id="NumberOfObstaclesSelect" onchange="updateObstacles()">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        <option value="25">25</option>
+        <option value="30">30</option>
+        <option value="35">35</option>
+        <option value="40">40</option>
+        <option value="45">45</option>
+        <option value="50">50</option>
+        <option value="55">55</option>
+        <option value="60">60</option>
+        <option value="65">65</option>
+        <option value="70">70</option>
+        <option value="75">75</option>
+        <option value="80">80</option>
+        <option value="85">85</option>
+        <option value="90">90</option>
+        <option value="95">95</option>
+        <option value="100">100</option>
+      </select>
+      <label for="WinScoreInput">Winning Score:</label>
+      <input type="number" id="WinScoreInput" name="WinScoreInput" min="1" step="1" value="1000" />
+    </div>
+    <div class="controls-row">
+      <button id="startButton" onclick="startGame()">New Game</button>
+      <button id="muteButton" onclick="toggleSound()">Sound On</button>
+      <button id="restartButton" onclick="restartGame()">Restart Game</button>
+      <button title="Reloads the web page. Click if you experience lagging during gameplay." id="resetButton" onclick="resetGame()">Reset</button>
+    </div>
+  </div>  
+  <div id="gameContainer">
+    <!-- The canvas will go here -->
+  </div>
+  <!-- Mobile Movement Control buttons -->
+  <div id="controls">
+    <button id="up" class="control-button" ontouchstart="setDirection(0, -1)">↑</button>   <!-- ↑ -->
+    <button id="left" class="control-button" ontouchstart="setDirection(-1, 0)">←</button> <!-- ← -->
+    <button id="right" class="control-button" ontouchstart="setDirection(1, 0)">→</button> <!-- → -->
+    <button id="down" class="control-button" ontouchstart="setDirection(0, 1)">↓</button>  <!-- ↓ -->
+  </div>
+  <!-- Rules section -->
+  <div id="rules-container" style="max-width: 600px; margin: 20px auto; font-family: sans-serif;">
+    <button onclick="toggleRules()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+      Help
+    </button>
+
+    <div id="rules" style="padding: 10px; margin-top: 10px; background: #1e1e1e; border: 1px solid #444; border-radius: 8px; color: white; display: none;">
+      <h2 style="text-align:center;">Playing Rules</h2>
+      <ul style="line-height: 1.6;">
+        <li><strong>Objective:</strong> Eat food to grow your snake and earn points. First to reach the winning score (default: 1000) wins.</li>
+        <li><strong>Player Snake:</strong> Blue (Human). Controlled with arrow keys or on-screen buttons (mobile).</li>
+        <li><strong>AI Snake:</strong> Red (AI). Moves automatically to chase food and power-ups.</li>
+        <li><strong>Modes:</strong>
+          <ul>
+            <li><strong>Player vs AI:</strong> You control Human against AI.</li>
+            <li><strong>AI vs AI:</strong> Watch Human and AI compete.</li>
+          </ul>
+        </li>
+        <li><strong>Game Speed:</strong> Increases as total score rises (every 150 points). Super/shrink food temporarily slows the game.</li>
+        <li><strong>Obstacles:</strong> Black blocks that move every 30 seconds. Avoid them to prevent collisions.</li>
+        <li><strong>Cannon:</strong> A moving cannon ("The Cannon") chases the closest snake, with its barrel facing its movement direction. It shoots projectiles every 30 frames. If hit, the snake grows by 1 segment, loses 1 point (if score > 0), and the cannon gains 1 point. The cannon’s score is displayed as "The Cannon: $X".</li>
+        <li><strong>Collisions:</strong> Hitting obstacles, yourself, or the other snake triggers penalties, a 30-frame invincibility period, and specific sounds:
+          <ul>
+            <li><strong>Self-Collision:</strong> Lose half your score (rounded down), other snake gains it.</li>
+            <li><strong>Snake Collision:</strong> Lose all your score, other snake gains it.</li>
+            <li><strong>Obstacle Collision:</strong> Lose 80% of your score (rounded down), other snake gains it.</li>
+          </ul>
+        </li>
+        <li><strong>Wrapping:</strong> Snakes wrap around screen edges for continuous movement.</li>
+        <li><strong>Scoring:</strong>
+          <ul>
+            <li><strong>Regular Food:</strong> Red apple, +1 point. Plays "eat" sound.</li>
+            <li><strong>Super Food:</strong> Golden, pulsing item, +5 points, grows snake, slows game speed (-2). Disappears after 5 seconds. Plays "ding" sound.</li>
+            <li><strong>Shrink Food:</strong> Pink item, +2 points, shrinks snake to 3 segments, slows game speed (-1). Disappears after 8 seconds. Plays "ding" and "shrink" sounds if shrunk.</li>
+            <li><strong>Mystery Food:</strong> White square with "?", randomly gives:
+              <ul>
+                <li><strong>Super Effect:</strong> +5 points, growth, slows game speed (-2). Plays "ding" sound.</li>
+                <li><strong>Shrink Effect:</strong> +2 points, shrinks to 3 segments, slows game speed (-1). Plays "ding" and "shrink" sounds if shrunk.</li>
+              </ul>
+              Disappears after 8 seconds.
+            </li>
+          </ul>
+        </li>
+        <li><strong>Power-Ups:</strong> Special items with temporary boosts, disappear after 8 seconds. Plays "ding" sound with popup message:
+          <ul>
+            <li><strong>Speed Boost:</strong> Yellow lightning bolt, 50% speed increase for ~100 frames. Shows "Speed Up!"</li>
+            <li><strong>Invincibility:</strong> Blue shield, prevents collisions for ~100 frames. Shows "Invincible!"</li>
+            <li><strong>Score Multiplier:</strong> Purple star, doubles points from food for ~200 frames. Shows "x2 Points!"</li>
+          </ul>
+        </li>
+        <li><strong>Settings:</strong> Adjust AI speed, game speed, obstacle count, and winning score via dropdowns. Settings save automatically.</li>
+        <li><strong>Reset:</strong> Click "Reset" to reload the page if lagging occurs. Settings are preserved.</li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Rules toggle script -->
+  <script>
+    function toggleRules() {
+      const rules = document.getElementById("rules");
+      rules.style.display = rules.style.display === "none" ? "block" : "none";
+    }
+  </script>
+
+  <!-- Game logic script -->
+  <script>
+    let winScore = 1000;
+    let gridSize = 20; // Size of the grid
+    let defaultRate = 2; // Default game speed
+    let numObstacles = 15; // Number of obstacles
+    let moveObstaclesAfter = 30000; // Move obstacles every 30 seconds
+    let maximumSpeed = 40; // Maximum speed of snakes
+    let increaseSpeedOnPoints = 150; // Increase speed every increaseSpeedOnPoints points
+    let tileSize;
+    let playerSnake, aiSnake, food, obstacles;
+    let gameOver = false;
+    let gameStarted = false;
+    let gameOverMessage = "";
+    let startButton, restartButton, controls, modeSelect, AIspeedSelect, GameSpeedSelect, NumberOfObstaclesSelect, RulesButton, soundButton;
+    let gameMode = "playerVsAI"; // Default game mode
+    let superFood;
+    let shrinkFood;
+    let mysteryFood;
+    let powerUp;
+    let cannon;
+    let soundEnabled = true;
+    let pointPopups = [];
+    let speedDecrease = 0;
+
+    let aiUpdateCounter = 0;
+    let aiUpdateIntervalSeconds = 2;
+    let aiUpdateInterval = aiUpdateIntervalSeconds; 
+
+    let eatSound, hitSound, gameOverSound, yeahSound, shrinkSound, finaleSound;
+
+    function preload() {
+      soundFormats('mp3', 'wav');
+      eatSound = loadSound('sounds/eat.mp3');
+      hitSound = loadSound('sounds/hit.mp3');
+      yeahSound = loadSound('sounds/ding.mp3');
+      shrinkSound = loadSound('sounds/shrink.mp3');
+      gameOverSound = loadSound('sounds/gameover.mp3');
+      finaleSound = loadSound('sounds/finale.mp3');
+    }
+
+    function setup() {
+      let canvasSize = min(windowWidth * 0.9, windowHeight * 0.9, 400);
+      canvasSize = floor(canvasSize / gridSize) * gridSize;
+      tileSize = canvasSize / gridSize;
+      let cnv = createCanvas(canvasSize, canvasSize);
+      cnv.parent("gameContainer");
+      frameRate(defaultRate);
+      startButton = document.getElementById('startButton');
+      restartButton = document.getElementById('restartButton');
+      soundButton = document.getElementById('muteButton');
+      controls = document.getElementById('controls');
+      modeSelect = document.getElementById('modeSelect');
+      AIspeedSelect = document.getElementById('AIspeedSelect');
+      GameSpeedSelect = document.getElementById('GameSpeedSelect');
+      NumberOfObstaclesSelect = document.getElementById('NumberOfObstaclesSelect');
+      WinScoreInput = document.getElementById('WinScoreInput');
+      RulesButton = document.getElementById('RulesButton');
+      
+      initializeGame();
+    }
+    WinScoreInput.addEventListener('change', () => {
+        saveSettings();
+    });
+
+    function initializeGame() {
+      playerSnake = new Snake(5, 5, [0, -1], 'blue');
+      playerSnake.name = "Human";
+      aiSnake = new Snake(15, 15, [0, 1], 'red');
+      aiSnake.name = "AI";
+      food = new Food();
+      superFood = new SuperFood();
+      shrinkFood = new ShrinkFood();
+      mysteryFood = new MysteryFood();
+      powerUp = new PowerUp();
+      obstacles = new Obstacles();
+      cannon = new Cannon();
+      cannon.score = 0;
+      obstacles.generate(numObstacles);
+      speedDecrease = 0;
+      pointPopups = [];
+      isAnySoundPlaying = false;
+      loadSettings();
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('muteButton').innerText = soundEnabled ? 'Sound On' : 'Muted';
+      saveSettings();
+    }
+
+    function playSoundIfNotPlaying(sound) {
+      if (soundEnabled && !sound.isPlaying()) {
+        sound.play();
+      }
+    }
+
+    function updateObstacles() {
+      numObstacles = parseInt(NumberOfObstaclesSelect.value);
+      obstacles.generate(numObstacles);
+      // Remove focus
+      NumberOfObstaclesSelect.blur();
+      saveSettings();
+    }
+
+    function updateGameSpeed() {
+      GameSpeedSelected = parseInt(GameSpeedSelect.value);
+      defaultRate = GameSpeedSelected;
+      frameRate(defaultRate);
+      // Remove focus
+      GameSpeedSelect.blur();
+      saveSettings();
+    }
+
+    function updateAISpeed() {
+      AIspeedSelected = parseInt(AIspeedSelect.value);
+      aiUpdateInterval = AIspeedSelected;
+      // Remove focus
+      AIspeedSelect.blur();
+      saveSettings();
+    }
+
+    function updateGameMode() {
+      gameMode = modeSelect.value;
+      // Remove focus
+      modeSelect.blur();     
+      saveSettings(); 
+    }
+
+    function draw() {
+      background(220);
+
+      // Dynamic frameRate based on total score, capped at maximumSpeed
+      let baseRate = defaultRate;
+      let speedIncrease = floor((playerSnake.score + aiSnake.score) / increaseSpeedOnPoints);
+      speedDecrease = 0; // Reset or adjust as needed
+      let newFrameRate = min(baseRate + speedIncrease + speedDecrease, maximumSpeed);
+      frameRate(newFrameRate);
+
+      if (gameStarted && !gameOver) {
+        food.show();
+        obstacles.move();
+        obstacles.show();
+        superFood.update();
+        superFood.show();
+        shrinkFood.update();
+        shrinkFood.show();
+        mysteryFood?.update();
+        mysteryFood?.show();
+        powerUp.update();
+        powerUp.show();
+
+        cannon.update();
+        cannon.show();
+        checkCannonHits();
+
+        if (gameMode === "playerVsAI") {
+          playerSnake.update();
+          aiUpdateInterval = AIspeedSelected;
+        } else {
+          aiUpdateInterval = AIspeedSelected;
+          playerSnake.updateAI();
+        }
+
+        aiUpdateCounter++;
+        if (aiUpdateCounter >= aiUpdateInterval) {
+          aiSnake.updateAI();
+          aiUpdateCounter = 0;
+        }
+
+        playerSnake.show();
+        aiSnake.show();
+        checkCollisions();
+
+        if (isMobileDevice() && gameMode === "playerVsAI") {
+          controls.style.display = 'grid';
+        } else {
+          controls.style.display = 'none';
+        }
+      } else if (gameOver) {
+        textSize(clamp(12, 3 * tileSize, 16));
+        textAlign(CENTER);
+        fill(0);
+        text(gameOverMessage, width / 2, height / 2);
+        // restartButton.style.display = 'block';
+        resetButton.style.display = 'block';
+        controls.style.display = 'none';
+      } else {
+        textSize(clamp(12, 3 * tileSize, 16));
+        textAlign(CENTER);
+        fill(0);
+        text("Select mode and press\n'New Game' to start", width / 2, height / 2);
+        startButton.style.display = 'block';
+        modeSelect.style.display = 'block';
+        AIspeedSelect.style.display = 'block';
+        GameSpeedSelect.style.display = 'block';
+        NumberOfObstaclesSelect.style.display = 'block';
+        restartButton.style.display = 'none';
+        //resetButton.style.display = 'none';
+        controls.style.display = 'none';
+      }
+
+      textSize(clamp(12, 3 * tileSize, 12));
+      textAlign(LEFT);
+
+      let x = 10;
+      let y = 20;
+
+      fill('rgba(0, 0, 255, 0.6)');
+      let playerText = `${playerSnake.name}: $${playerSnake.score}`;
+      text(playerText, x, y);
+      x += textWidth(playerText) + 20;
+
+      fill('rgba(255, 0, 0, 0.6)');
+      let aiText = `${aiSnake.name}: $${aiSnake.score}`;
+      text(aiText, x, y);
+      x += textWidth(aiText) + 20;
+
+      fill('rgba(128, 0, 128, 0.6)');
+      let cannonText = `The Cannon: $${cannon.score}`;
+      text(cannonText, x, y);
+      x += textWidth(cannonText) + 20;
+
+      fill('rgba(0, 0, 0, 0.6)');
+      let speedText = `Speed: ${floor(frameRate())}`;
+      text(speedText, x, y);
+
+      if (!shrinkFood.active && random() < 0.004) {
+        shrinkFood = new ShrinkFood();
+      }
+      if (!mysteryFood?.active && random() < 0.003) {
+        mysteryFood = new MysteryFood();
+      }
+      if (!powerUp.active && random() < 0.003) {
+        powerUp = new PowerUp();
+      }
+
+      for (let i = pointPopups.length - 1; i >= 0; i--) {
+        pointPopups[i].update();
+        pointPopups[i].show();
+        if (pointPopups[i].isDone()) {
+          pointPopups.splice(i, 1);
+        }
+      }
+    }
+
+    function checkCannonHits() {
+        for (let i = cannon.projectiles.length - 1; i >= 0; i--) {
+          let p = cannon.projectiles[i];
+
+          [playerSnake, aiSnake].forEach(snake => {
+            for (let j = 0; j < snake.body.length; j++) {
+              let segment = snake.body[j];
+
+              let distance = dist(p.x, p.y, segment[0], segment[1]);
+              if (distance < 0.5) {
+                if (snake.invincibilityTimer > 0) {
+                  cannon.projectiles.splice(i, 1);
+                  break;
+                }
+                let tail = snake.body[snake.body.length - 1];
+                snake.body.push([...tail]); // Snake grows by 1 segment
+                if (snake.score > 0) {
+                  snake.score -= 1; // Deduct 1 point from snake
+                  cannon.score += 1; // Add 1 point to cannon
+                }
+                cannon.projectiles.splice(i, 1);
+                // playSoundIfNotPlaying(hitSound);
+                pointPopups.push(
+                  new PointPopup(
+                    (p.x + 0.5) * tileSize,
+                    (p.y + 0.5) * tileSize,
+                    `${snake.name} -1, Cannon +1`,
+                    'orange'
+                  )
+                );
+                break;
+              }
+            }
+          });
+        }
+      }
+
+    function keyPressed() {
+      if (!gameStarted || gameOver || gameMode === "AIVsAI") return;
+      setDirectionFromKey(keyCode);
+    }
+
+    function setDirectionFromKey(keyCode) {
+      if (keyCode === UP_ARROW && playerSnake.dir[1] !== 1) {
+        playerSnake.dir = [0, -1];
+      } else if (keyCode === DOWN_ARROW && playerSnake.dir[1] !== -1) {
+        playerSnake.dir = [0, 1];
+      } else if (keyCode === LEFT_ARROW && playerSnake.dir[0] !== 1) {
+        playerSnake.dir = [-1, 0];
+      } else if (keyCode === RIGHT_ARROW && playerSnake.dir[0] !== -1) {
+        playerSnake.dir = [1, 0];
+      }
+    }
+
+    function setDirection(dx, dy) {
+      if (!gameStarted || gameOver || gameMode === "AIVsAI") return;
+      if (dx === 0 && dy === -1 && playerSnake.dir[1] !== 1) {
+        playerSnake.dir = [0, -1];
+      } else if (dx === 0 && dy === 1 && playerSnake.dir[1] !== -1) {
+        playerSnake.dir = [0, 1];
+      } else if (dx === -1 && dy === 0 && playerSnake.dir[0] !== 1) {
+        playerSnake.dir = [-1, 0];
+      } else if (dx === 1 && dy === 0 && playerSnake.dir[0] !== -1) {
+        playerSnake.dir = [1, 0];
+      }
+    }
+
+    function startGame() {
+      gameMode = modeSelect.value;
+      winScore = parseInt(WinScoreInput.value);
+      numObstacles = parseInt(NumberOfObstaclesSelect.value);
+      AIspeedSelected = parseInt(AIspeedSelect.value); 
+      GameSpeedSelected = parseInt(GameSpeedSelect.value); 
+      defaultRate = GameSpeedSelected;
+      frameRate(defaultRate);
+      saveSettings();
+      userStartAudio();
+      gameStarted = true;
+      gameOver = false;
+      gameOverMessage = "";
+      initializeGame();
+      restartButton.style.display = 'none';
+      //resetButton.style.display = 'none';
+    }
+
+    function restartGame() {
+      gameMode = modeSelect.value;
+      winScore = parseInt(WinScoreInput.value);
+      numObstacles = parseInt(NumberOfObstaclesSelect.value);
+      AIspeedSelected = parseInt(AIspeedSelect.value); 
+      GameSpeedSelected = parseInt(GameSpeedSelect.value);
+      defaultRate = GameSpeedSelected;
+      frameRate(defaultRate);
+      saveSettings();
+      gameStarted = true;
+      gameOver = false;
+      gameOverMessage = "";
+      initializeGame();
+      restartButton.style.display = 'none';
+    }
+
+    function saveSettings() {
+        const settings = {
+            gameMode: modeSelect.value,
+            aiSpeed: AIspeedSelect.value,
+            gameSpeed: GameSpeedSelect.value,
+            numObstacles: NumberOfObstaclesSelect.value,
+            winScore: WinScoreInput.value,
+            soundEnabled: soundEnabled
+            
+        };
+        localStorage.setItem('snakeGameSettings', JSON.stringify(settings));
+    }
+
+    function loadSettings() {
+        const savedSettings = localStorage.getItem('snakeGameSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            modeSelect.value = settings.gameMode || 'playerVsAI';
+            AIspeedSelect.value = settings.aiSpeed || '2';
+            GameSpeedSelect.value = settings.gameSpeed || '2';
+            NumberOfObstaclesSelect.value = settings.numObstacles || '15';
+            WinScoreInput.value = settings.winScore || '1000';
+            soundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
+            document.getElementById('muteButton').innerText = soundEnabled ? 'Sound On' : 'Muted';
+            updateGameMode();
+            updateAISpeed();
+            updateGameSpeed();
+            updateObstacles();
+        }
+    }
+
+    function resetGame() {
+        if (confirm("Are you sure? This will reload the page (your settins will be saved, however).")) {
+            saveSettings();
+            window.location.reload();
+        }
+    }
+
+    class Snake {
+            constructor(x, y, dir, color) {
+              this.body = [[x, y]];
+              this.dir = dir;
+              this.color = color;
+              this.score = 0;
+              this.name = "";
+              this.speedBoost = 1;
+              this.speedTimer = 0;
+              this.invincibilityTimer = 0;
+              this.scoreMultiplier = 1;
+              this.multiplierTimer = 0;
+            }
+
+      update() {
+        if (this.speedTimer > 0) {
+          this.speedTimer--;
+          if (this.speedTimer <= 0) this.speedBoost = 1;
+        }
+        if (this.invincibilityTimer > 0) this.invincibilityTimer--;
+        if (this.multiplierTimer > 0) {
+          this.multiplierTimer--;
+          if (this.multiplierTimer <= 0) this.scoreMultiplier = 1;
+        }
+
+        let head = this.body[0].slice();
+        head[0] += this.dir[0] * this.speedBoost;
+        head[1] += this.dir[1] * this.speedBoost;
+        let roundedHead = [Math.floor(head[0]), Math.floor(head[1])];
+        roundedHead[0] = (roundedHead[0] + gridSize) % gridSize;
+        roundedHead[1] = (roundedHead[1] + gridSize) % gridSize;
+        this.body.unshift(roundedHead);
+
+        // Adjust distance threshold based on speedBoost
+        let distThreshold = this.speedBoost > 1 ? 1.0 : 0.5;
+
+        if (dist(head[0], head[1], food.x, food.y) < distThreshold) {
+          this.score += 1 * this.scoreMultiplier;
+          playSoundIfNotPlaying(eatSound);
+          food = new Food();
+          pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${1 * this.scoreMultiplier}`, 'green'));
+        } else if (superFood.active && dist(head[0], head[1], superFood.x, superFood.y) < distThreshold) {
+          this.score += 5 * this.scoreMultiplier;
+          speedDecrease += -2;
+          playSoundIfNotPlaying(yeahSound);
+          pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+          superFood.active = false;
+        } else if (shrinkFood.active && dist(head[0], head[1], shrinkFood.x, shrinkFood.y) < distThreshold) {
+          this.score += 2 * this.scoreMultiplier;
+          speedDecrease += -1;
+          pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+          playSoundIfNotPlaying(yeahSound);
+          shrinkFood.active = false;
+          if (this.body.length > 3) {
+            this.body = this.body.slice(0, 3);
+            pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+            playSoundIfNotPlaying(shrinkSound);
+          }
+        } else if (mysteryFood?.active && dist(head[0], head[1], mysteryFood.x, mysteryFood.y) < distThreshold) {
+          mysteryFood.active = false;
+          if (random() < 0.5) {
+            this.score += 5 * this.scoreMultiplier;
+            speedDecrease += -2;
+            playSoundIfNotPlaying(yeahSound);
+            pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+          } else {
+            this.score += 2 * this.scoreMultiplier;
+            speedDecrease += -1;
+            playSoundIfNotPlaying(yeahSound);
+            pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+            if (this.body.length > 3) {
+              this.body = this.body.slice(0, 3);
+              pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+              playSoundIfNotPlaying(shrinkSound);
+            }
+          }
+        } else if (powerUp.active && dist(head[0], head[1], powerUp.x, powerUp.y) < distThreshold) {
+          powerUp.applyEffect(this);
+          playSoundIfNotPlaying(yeahSound);
+          powerUp.active = false;
+        } else {
+          this.body.pop();
+        }
+      }
+
+      updateAI() {
+        let head = this.body[0];
+        let targetX = food.x;
+        let targetY = food.y;
+        let priority = 1;
+
+        if (powerUp.active) {
+          targetX = powerUp.x;
+          targetY = powerUp.y;
+          priority = 4;
+        } else if (mysteryFood.active) {
+          targetX = mysteryFood.x;
+          targetY = mysteryFood.y;
+          priority = 3;
+        } else if (shrinkFood.active) {
+          targetX = shrinkFood.x;
+          targetY = shrinkFood.y;
+          priority = 2;
+        } else if (superFood.active) {
+          targetX = superFood.x;
+          targetY = superFood.y;
+          priority = 1.5;
+        }
+
+        let dx = targetX - head[0];
+        let dy = targetY - head[1];
+        let newDir = this.dir.slice();
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+          newDir = dx > 0 ? [1, 0] : [-1, 0];
+        } else {
+          newDir = dy > 0 ? [0, 1] : [0, -1];
+        }
+
+        if (this.isValidMove(newDir)) {
+          this.dir = newDir;
+        } else {
+          let possibleDirs = this.getValidDirections(head);
+          if (possibleDirs.length > 0) {
+            this.dir = random(possibleDirs);
+          }
+        }
+
+        this.update();
+      }
+
+      getValidDirections(head) {
+        let directions = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1]
+        ];
+
+        let validDirs = [];
+        for (let dir of directions) {
+          if (this.isValidMove(dir)) {
+            validDirs.push(dir);
+          }
+        }
+        return validDirs;
+      }
+
+      isValidMove(dir) {
+        let head = this.body[0];
+        let next = [head[0] + dir[0], head[1] + dir[1]];
+        next[0] = (next[0] + gridSize) % gridSize;
+        next[1] = (next[1] + gridSize) % gridSize;
+
+        // Check collision with own body
+        if (this.invincibilityTimer <= 0 && this.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
+          return false;
+        }
+
+        // Check collision with obstacles
+        if (this.invincibilityTimer <= 0 && obstacles.positions.some(obstacle => obstacle[0] === next[0] && obstacle[1] === next[1])) {
+          return false;
+        }
+
+        // Check collision with other snake
+        if (this.invincibilityTimer <= 0) {
+          if (this.color === 'red' && playerSnake.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
+            return false;
+          }
+          if (this.color === 'blue' && aiSnake.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
+            return false;
+          }
+        }
+
+        // Check collision with cannon (using floor to align with grid)
+        if (next[0] === floor(cannon.x) && next[1] === floor(cannon.y)) {
+          return false;
+        }
+
+        // Check collision with cannon projectiles
+        for (let proj of cannon.projectiles) {
+          let px = floor(proj.x);
+          let py = floor(proj.y);
+          if (next[0] === px && next[1] === py) {
+            return false;
+          }
+          let fx = floor(proj.x + proj.dx);
+          let fy = floor(proj.y + proj.dy);
+          if (next[0] === fx && next[1] === fy) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      show() {
+        for (let i = 0; i < this.body.length; i++) {
+          const [x, y] = this.body[i];
+          const px = x * tileSize;
+          const py = y * tileSize;
+
+          if (i === 0) {
+            // Head as triangle
+            fill(this.color);
+            noStroke();
+
+            const half = tileSize / 2;
+
+            push();
+            translate(px + half, py + half);
+            rotate(this.dirToAngle(this.dir));
+
+            beginShape();
+            vertex(0, -half); // top
+            vertex(-half, half); // bottom-left
+            vertex(half, half); // bottom-right
+            endShape(CLOSE);
+            pop();
+          } else {
+                  noStroke();
+                  fill(this.color);
+                  rect(px+1, py+1, tileSize-2, tileSize-2);
+                  }
+
+          if (this.invincibilityTimer > 0) {
+            push();
+            noFill();
+            stroke(0, 0, 0, 120);
+            strokeWeight(2);
+            ellipse(px + tileSize / 2, py + tileSize / 2, tileSize * 1.1);
+            pop();
+          }
+        }
+      }
+
+      dirToAngle(dir) {
+        if (dir[0] === 1) return HALF_PI; // Right
+        if (dir[0] === -1) return -HALF_PI; // Left
+        if (dir[1] === 1) return PI; // Down
+        return 0; // Up
+      }
+
+      
+    }
+
+    class Cannon {
+  constructor() {
+    this.x = floor(gridSize / 2);
+    this.y = floor(gridSize / 2);
+    this.projectiles = [];
+    this.shootInterval = 30;
+    this.frameCounter = 0;
+    this.lastAngle = 0;
+    this.moveAngle = 0; // New property for movement direction
+    this.isFiringSoon = false;
+    this.speed = 0.1;
+    this.score = 0;
+  }
+
+  update() {
+    this.frameCounter++;
+    
+    // Determine which snake to chase (closest snake)
+    const playerHead = playerSnake.body[0];
+    const aiHead = aiSnake.body[0];
+    const playerDist = dist(this.x, this.y, playerHead[0], playerHead[1]);
+    const aiDist = dist(this.x, this.y, aiHead[0], aiHead[1]);
+    let target = playerDist <= aiDist ? playerHead : aiHead;
+
+    // Move towards the target snake
+    let dx = target[0] - this.x;
+    let dy = target[1] - this.y;
+    let mag = sqrt(dx * dx + dy * dy);
+    if (mag > 0) {
+      dx /= mag;
+      dy /= mag;
+      this.x += dx * this.speed;
+      this.y += dy * this.speed;
+      
+      // Update moveAngle based on movement direction
+      this.moveAngle = atan2(dy, dx);
+      
+      // Keep cannon within grid bounds
+      this.x = (this.x + gridSize) % gridSize;
+      this.y = (this.y + gridSize) % gridSize;
+    }
+
+    // Shooting logic
+    if (this.frameCounter >= this.shootInterval) {
+      this.aimAndShoot();
+      this.frameCounter = 0;
+      if (this.projectiles.length > 5) {
+        this.projectiles.splice(0, this.projectiles.length - 5);
+      }
+    }
+
+    this.isFiringSoon = (this.frameCounter < 15);
+
+    // Update projectiles
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      let p = this.projectiles[i];
+      p.x += p.dx;
+      p.y += p.dy;
+
+      if (p.x < 0 || p.y < 0 || p.x >= gridSize || p.y >= gridSize) {
+        this.projectiles.splice(i, 1);
+      }
+    }
+  }
+
+  show() {
+    let cx = (this.x + 0.5) * tileSize;
+    let cy = (this.y + 0.5) * tileSize;
+
+    push();
+    translate(cx, cy);
+    rotate(this.moveAngle); // Use moveAngle for barrel orientation
+
+    if (this.isFiringSoon) {
+      fill(255, 0, 0, 150);
+    } else {
+      fill(30);
+    }
+    rect(0, -tileSize * 0.1, tileSize * 0.6, tileSize * 0.2, 5);
+
+    fill(50, 50, 50, 127);
+    ellipse(0, 0, tileSize * 1.0);
+
+    pop();
+
+    fill('black');
+    for (let p of this.projectiles) {
+      ellipse((p.x + 0.5) * tileSize, (p.y + 0.5) * tileSize, tileSize / 2);
+    }
+  }
+
+  aimAndShoot() {
+    const playerHead = playerSnake.body[0];
+    const aiHead = aiSnake.body[0];
+
+    const playerDist = dist(this.x, this.y, playerHead[0], playerHead[1]);
+    const aiDist = dist(this.x, this.y, aiHead[0], aiHead[1]);
+
+    let target = playerDist <= aiDist ? playerHead : aiHead;
+
+    let dx = target[0] - this.x;
+    let dy = target[1] - this.y;
+
+    this.lastAngle = atan2(dy, dx);
+
+    let mag = sqrt(dx * dx + dy * dy);
+    dx /= mag;
+    dy /= mag;
+
+    this.projectiles.push({ x: this.x, y: this.y, dx, dy });
+  }
+}
+
+    class Food {
+  constructor() {
+    this.x = floor(random(gridSize));
+    this.y = floor(random(gridSize));
+  }
+
+  show() {
+    // Apple body
+    fill('red');
+    noStroke();
+    ellipse(
+      this.x * tileSize + tileSize / 2,
+      this.y * tileSize + tileSize / 2,
+      tileSize * 0.8,
+      tileSize * 0.8
+    );
+
+    // Apple stem
+    stroke(80, 42, 42); // brownish stem
+    strokeWeight(2);
+    line(
+      this.x * tileSize + tileSize / 2,
+      this.y * tileSize + tileSize / 2 - tileSize * 0.4,
+      this.x * tileSize + tileSize / 2,
+      this.y * tileSize + tileSize / 2 - tileSize * 0.6
+    );
+  }
+}
+
+
+    class SuperFood {
+      constructor() {
+        this.active = false;
+        this.timer = 0;
+        this.duration = 300;
+        this.x = 0;
+        this.y = 0;
+        this.pulseTime = 0;
+      }
+
+      maybeSpawn() {
+        if (!this.active && random(1) < 0.005) {
+          this.x = floor(random(gridSize));
+          this.y = floor(random(gridSize));
+          this.timer = this.duration;
+          this.pulseTime = 0;
+          this.active = true;
+        }
+      }
+
+      update() {
+        if (this.active) {
+          this.timer--;
+          if (this.timer <= 0) {
+            this.active = false;
+          }
+        } else {
+          this.maybeSpawn();
+        }
+        this.pulseTime += 0.15;
+      }
+
+      show() {
+        if (this.active) {
+          let scale = sin(this.pulseTime) * 0.5 + 1.2;
+          fill(255, 215, 0);
+          noStroke();
+          ellipse(this.x * tileSize + tileSize / 2, this.y * tileSize + tileSize / 2, tileSize * scale);
+        }
+      }
+    }
+
+    class ShrinkFood {
+      constructor() {
+        this.spawn();
+        this.timer = millis();
+        this.lifetime = 8000;
+        this.active = true;
+      }
+
+      spawn() {
+        this.x = floor(random(gridSize));
+        this.y = floor(random(gridSize));
+      }
+
+      update() {
+        if (millis() - this.timer > this.lifetime) {
+          this.active = false;
+        }
+      }
+
+      show() {
+        if (this.active) {
+          push();
+          fill('pink');
+          stroke(255, 105, 180);
+          strokeWeight(2);
+          ellipse((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, tileSize * 0.7);
+          pop();
+        }
+      }
+    }
+
+    class MysteryFood {
+      constructor() {
+        this.x = floor(random(gridSize));
+        this.y = floor(random(gridSize));
+        this.active = true;
+        this.spawnTime = millis();
+        this.duration = 8000;
+      }
+
+      update() {
+        if (millis() - this.spawnTime > this.duration) {
+          this.active = false;
+        }
+      }
+
+      show() {
+        if (!this.active) return;
+
+        stroke(128, 0, 128);
+        strokeWeight(2);
+        fill(255);
+        rect(
+          this.x * tileSize,
+          this.y * tileSize,
+          tileSize,
+          tileSize,
+          4
+        );
+
+        noStroke();
+        fill(128, 0, 128);
+        textAlign(CENTER, CENTER);
+        textSize(tileSize * 0.8);
+        text("?", this.x * tileSize + tileSize / 2, this.y * tileSize + tileSize / 2);
+      }
+    }
+
+    class PowerUp {
+      constructor() {
+        this.types = ['speed', 'invincibility', 'multiplier'];
+        this.type = random(this.types);
+        this.x = floor(random(gridSize));
+        this.y = floor(random(gridSize));
+        this.active = true;
+        this.spawnTime = millis();
+        this.duration = 8000;
+        this.pulseTime = 0;
+      }
+
+      update() {
+        if (this.active && millis() - this.spawnTime > this.duration) {
+          this.active = false;
+        }
+        this.pulseTime += 0.15;
+      }
+
+      show() {
+        if (!this.active) return;
+        let scale = sin(this.pulseTime) * 0.5 + 1.2;
+        push();
+        noStroke();
+        if (this.type === 'speed') {
+          ///*
+          fill(255, 255, 0);
+          triangle(
+            this.x * tileSize + tileSize * 0.3, this.y * tileSize + tileSize * 0.7,
+            this.x * tileSize + tileSize * 0.5, this.y * tileSize + tileSize * 0.3,
+            this.x * tileSize + tileSize * 0.7, this.y * tileSize + tileSize * 0.7
+          );
+          //*/
+        } else if (this.type === 'invincibility') {
+          fill(0, 0, 255);
+          ellipse(this.x * tileSize + tileSize / 2, this.y * tileSize + tileSize / 2, tileSize * scale);
+        } else if (this.type === 'multiplier') {
+          fill(128, 0, 128);
+          beginShape();
+          for (let i = 0; i < 5; i++) {
+            let angle = TWO_PI / 5 * i;
+            let r = tileSize * 0.5 * scale;
+            vertex(this.x * tileSize + tileSize / 2 + r * cos(angle), this.y * tileSize + tileSize / 2 + r * sin(angle));
+            angle += TWO_PI / 10;
+            r = tileSize * 0.25 * scale;
+            vertex(this.x * tileSize + tileSize / 2 + r * cos(angle), this.y * tileSize + tileSize / 2 + r * sin(angle));
+          }
+          endShape(CLOSE);
+        }
+        pop();
+      }
+
+      applyEffect(snake) {
+        if (this.type === 'speed') {
+          snake.speedBoost = 1.5;
+          snake.speedTimer = 100;
+          pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} Speed Up!`, '#4B0082'));
+        } else if (this.type === 'invincibility') {
+          snake.invincibilityTimer = 100;
+          pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} Invincible!`, 'blue'));
+        } else if (this.type === 'multiplier') {
+          snake.scoreMultiplier = 2;
+          snake.multiplierTimer = 200;
+          pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} x2 Points!`, 'purple'));
+        }
+      }
+    }
+
+    class Obstacles {
+      constructor() {
+        this.positions = [];
+        this.lastMoved = 0;
+      }
+
+      generate(numObstacles) {
+        this.positions = [];
+        // Use a safety counter to prevent infinite loops if it's impossible to place obstacles
+        let attempts = 0;
+        const maxAttemptsPerObstacle = gridSize * gridSize * 5; // Try multiple times per obstacle
+
+        while (this.positions.length < numObstacles && attempts < numObstacles * maxAttemptsPerObstacle) {
+            let x = floor(random(gridSize));
+            let y = floor(random(gridSize));
+            let pos = [x, y];
+            attempts++;
+
+            let overlaps = false;
+
+            // Check overlap with Player Snake body
+            if (playerSnake.body.some(segment => segment[0] === x && segment[1] === y)) {
+                overlaps = true;
+            }
+
+            // Check overlap with AI Snake body
+            if (!overlaps && aiSnake.body.some(segment => segment[0] === x && segment[1] === y)) {
+                overlaps = true;
+            }
+
+            // Check overlap with Food
+            if (!overlaps && (x === food.x && y === food.y)) {
+                overlaps = true;
+            }
+
+            // Check overlap with Super Food (if active)
+            if (!overlaps && superFood.active && (x === superFood.x && y === superFood.y)) {
+                overlaps = true;
+            }
+
+            // Check overlap with Shrink Food (if active)
+            if (!overlaps && shrinkFood.active && (x === shrinkFood.x && y === shrinkFood.y)) {
+                overlaps = true;
+            }
+
+            // Check overlap with Mystery Food (if active). Use ?.active for safety.
+            if (!overlaps && mysteryFood?.active && (x === mysteryFood.x && y === mysteryFood.y)) {
+                 overlaps = true;
+            }
+
+            // Check overlap with Power Up (if active)
+            if (!overlaps && powerUp.active && (x === powerUp.x && y === powerUp.y)) {
+                overlaps = true;
+            }
+
+            // Check overlap with Cannon
+            if (!overlaps && (x === floor(cannon.x) && y === floor(cannon.y))) {
+                overlaps = true;
+            }
+
+            // Check overlap with already placed Obstacles
+             if (!overlaps && this.positions.some(obstacle => obstacle[0] === x && obstacle[1] === y)) {
+                overlaps = true;
+            }
+
+
+            if (!overlaps) {
+                this.positions.push(pos);
+            }
+        }
+         // Handle case where not enough obstacles could be placed
+         if (this.positions.length < numObstacles) {
+             console.warn(`Could only place ${this.positions.length} out of ${numObstacles} obstacles.`);
+         }
+      }
+
+      move() {
+        let currentTime = millis();
+        if (currentTime - this.lastMoved >= moveObstaclesAfter) {
+          this.lastMoved = currentTime;
+          this.generate(this.positions.length);
+        }
+      }
+
+      show() {
+        fill('black');
+        noStroke();
+        for (let pos of this.positions) {
+          rect(pos[0] * tileSize, pos[1] * tileSize, tileSize, tileSize);
+        }
+      }
+    }
+
+    function clearPointPopupsKeepRecent() {
+      const maxPopupsToKeep = 10;
+      if (pointPopups.length > maxPopupsToKeep) {
+        pointPopups.splice(0, pointPopups.length - maxPopupsToKeep); // Keep last 10
+      }
+    }
+
+    function checkCollisions() {
+      if ((playerSnake.score >= winScore) || (aiSnake.score >= winScore)) {
+        gameOver = true;
+        if (playerSnake.score >= winScore) {
+          winner = playerSnake.name;
+          gameOverMessage = `${playerSnake.name} Wins!`;
+        } else if (aiSnake.score >= winScore) {
+          winner = aiSnake.name;
+          gameOverMessage = `${aiSnake.name} Wins!`;
+        }
+      }
+
+      let head = playerSnake.body[0];
+      if (playerSnake.invincibilityTimer <= 0) {
+        
+        if (playerSnake.body.slice(1).some(segment => segment[0] === head[0] && segment[1] === head[1])) {
+          /*
+          gameOver = true;
+          gameOverMessage = `BOOM! ${playerSnake.name} crashed into itself!`;
+          if (soundEnabled) gameOverSound.play();
+          if (soundEnabled) finaleSound.play();
+          */
+          let halfScore = Math.floor(playerSnake.score / 2);
+          aiSnake.score += halfScore;
+          playerSnake.score -= halfScore;
+
+          playerSnake.invincibilityTimer = 30;
+          clearPointPopupsKeepRecent();
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} Crashed into itself!`, 'red'));
+          
+          playSoundIfNotPlaying(hitSound);
+          return;
+        }
+        if (aiSnake.body.some(segment => segment[0] === head[0] && segment[1] === head[1])) {
+          /*
+          gameOver = true;
+          gameOverMessage = `BOOM! ${playerSnake.name} crashed into ${aiSnake.name}!`;
+          if (soundEnabled) gameOverSound.play();
+          if (soundEnabled) finaleSound.play();
+          */
+          aiSnake.score = aiSnake.score + playerSnake.score;
+          playerSnake.score = 0;
+          playerSnake.invincibilityTimer = 30;
+          clearPointPopupsKeepRecent();
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} Crashed into ${aiSnake.name}!`, 'red'));
+          
+          playSoundIfNotPlaying(hitSound);
+          return;
+        }
+        
+        if (obstacles.positions.some(obstacle => obstacle[0] === head[0] && obstacle[1] === head[1])) {
+          /*
+          gameOver = true;
+          gameOverMessage = `BOOM! ${playerSnake.name} crashed into Obstacle!`;
+          if (soundEnabled) gameOverSound.play();
+          if (soundEnabled) finaleSound.play();
+          */
+          let stolen = Math.floor(playerSnake.score * 0.8);
+          aiSnake.score += stolen;
+          playerSnake.score -= stolen;
+
+          playerSnake.invincibilityTimer = 30;
+          clearPointPopupsKeepRecent();
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} Crashed into Obstacle!`, 'red'));
+          
+          playSoundIfNotPlaying(hitSound);
+          return;
+        }
+      }
+      let aiHead = aiSnake.body[0];
+      if (aiSnake.invincibilityTimer <= 0) {
+          if (obstacles.positions.some(obstacle => obstacle[0] === aiHead[0] && obstacle[1] === aiHead[1])) {
+            /*
+            gameOver = true;
+            gameOverMessage = `BOOM! ${aiSnake.name} crashed into Obstacle!`;
+            if (soundEnabled) gameOverSound.play();
+            if (soundEnabled) finaleSound.play();
+            */
+            let stolen = Math.floor(aiSnake.score * 0.8);
+            playerSnake.score += stolen;
+            aiSnake.score -= stolen;
+
+            aiSnake.invincibilityTimer = 30;
+            clearPointPopupsKeepRecent();
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} Crashed into Obstacle!`, 'red'));
+            
+            playSoundIfNotPlaying(hitSound);
+            return;
+          }
+          if (playerSnake.body.some(segment => segment[0] === aiHead[0] && segment[1] === aiHead[1])) {
+            /*
+            gameOver = true;
+            gameOverMessage = `BOOM! ${aiSnake.name} crashed into ${playerSnake.name}!`;
+            if (soundEnabled) gameOverSound.play();
+            if (soundEnabled) finaleSound.play();
+            */
+            playerSnake.score = playerSnake.score + aiSnake.score;
+            aiSnake.score = 0;
+            
+            aiSnake.invincibilityTimer = 30;
+            clearPointPopupsKeepRecent();
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} Crashed into ${playerSnake.name}!`, 'red'));
+            
+            playSoundIfNotPlaying(hitSound);
+            return;
+          }
+          if (playerSnake.body.slice(1).some(segment => segment[0] === aiHead[0] && segment[1] === aiHead[1])) {
+            /*
+            gameOver = true;
+            gameOverMessage = `BOOM! ${aiSnake.name} crashed into itself!`;
+            if (soundEnabled) gameOverSound.play();
+            if (soundEnabled) finaleSound.play();
+            */
+            let halfScore = Math.floor(aiSnake.score / 2);
+            playerSnake.score += halfScore;
+            aiSnake.score -= halfScore;
+            aiSnake.invincibilityTimer = 30;
+            clearPointPopupsKeepRecent();
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} Crashed into itself!`, 'red'));
+            
+            playSoundIfNotPlaying(hitSound);
+            return;
+          }
+      }
+    }
+
+    function isMobileDevice() {
+      return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function clamp(min, val, max) {
+      return Math.min(Math.max(val, min), max);
+    }
+
+    class PointPopup {
+      constructor(x, y, text, color) {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.color = color || 'black';
+        this.opacity = 250;
+        this.lifetime = 20;
+      }
+
+      update() {
+        this.y -= 0.4;
+        this.opacity -= 4.5;
+        this.lifetime--;
+      }
+
+      show() {
+        let c = color(this.color);
+        c.setAlpha(this.opacity);
+
+        let textWidthValue = textWidth(this.text);
+        let rectWidth = textWidthValue + 10;
+        let rectHeight = 20;
+
+        push();
+        rectMode(CENTER);
+        noStroke();
+        fill(255, this.opacity);
+        rect(this.x, this.y, rectWidth, rectHeight, 4);
+        pop();
+
+        fill(c);
+        noStroke();
+        textAlign(CENTER, CENTER);
+        textSize(12);
+        text(this.text, this.x, this.y);
+      }
+
+      isDone() {
+        return this.lifetime <= 0;
+      }
+    }
+  </script>
+  <!-- End of Game Logic -->
+  </body>
+</html>
