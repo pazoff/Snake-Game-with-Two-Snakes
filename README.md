@@ -229,7 +229,7 @@ Below is a detailed description of the key functions in the game, grouped by cat
 ## Setup Instructions
 1. **Clone the Repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/pazoff/Snake-Game-with-Two-Snakes
    ```
 2. **Host the Game**:
    - Use a local server (e.g., `python -m http.server` or VS Code Live Server) to serve `snakes.html`.
