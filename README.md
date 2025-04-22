@@ -3,6 +3,8 @@
 ## Overview
 This is a modern take on the classic Snake game, built using [p5.js](https://p5js.org/). The game features two snakes (one player-controlled and one AI-controlled or both AI-controlled), dynamic obstacles, a central cannon, various food types, and power-ups. It supports both desktop (keyboard controls) and mobile (on-screen buttons) gameplay, with customizable settings and sound effects. The game is designed to be engaging with strategic elements, such as score penalties for collisions, temporary boosts from power-ups, and a cannon that interacts with the snakes.
 
+[![Watch the video](thumbnail.png)](https://youtu.be/7qOhsr7XG3Y)
+
 ## How to Play
 - **Objective**: Eat food to grow your snake and earn points. The first snake to reach the **winning score** (default: 1000 points) wins.
 - **Snakes**:
