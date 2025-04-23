@@ -6,6 +6,8 @@ This is a modern take on the classic Snake game, built using [p5.js](https://p5j
 [Play the Snake Game with Two Snakes](https://pazoff.github.io/Snake-Game-with-Two-Snakes/)  
 👉 Tip: Right-click the link and choose "Open link in new tab", or hold **Ctrl** (Windows/Linux) or **Cmd** (Mac) while clicking to open in a new tab.
 
+👉 **Watch the Demo**
+
 [![Watch the Demo](thumbnail.png)](https://youtu.be/7qOhsr7XG3Y)
 
 ## How to Play
