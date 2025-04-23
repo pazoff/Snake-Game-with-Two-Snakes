@@ -133,7 +133,7 @@
       align-items: center;
     }
 
-    #modeSelect, #AIspeedSelect, #GameSpeedSelect, #NumberOfObstaclesSelect {
+    #modeSelect, #AIspeedSelect, #GameSpeedSelect, #NumberOfObstaclesSelect, #SpeedDescreaseSelect {
       margin: 10px 0;
       padding: 10px;
       font-size: clamp(14px, 4vw, 16px);
@@ -144,7 +144,7 @@
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
-    #modeSelect:hover, #AIspeedSelect:hover, #GameSpeedSelect:hover, #NumberOfObstaclesSelect:hover, #WinScoreInput:hover {
+    #modeSelect:hover, #AIspeedSelect:hover, #GameSpeedSelect:hover, #NumberOfObstaclesSelect:hover, #WinScoreInput:hover, #SpeedDescreaseSelect:hover {
       background-color: #455A64;
     }
     #WinScoreInput {
@@ -181,7 +181,7 @@
 
     /* Styles for toggleable controls container */
     #controls-container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 20px auto;
       font-family: sans-serif;
     }
@@ -274,6 +274,11 @@
           <option value="38">38</option>
           <option value="39">39</option>
           <option value="40">40</option>
+        </select>
+        <label for="SpeedDescreaseSelect">Speed Decrease:</label>
+        <select id="SpeedDescreaseSelect" onchange="updateSpeedDecrease()">
+          <option value="1">Yes</option>
+          <option value="0">No</option>
         </select>
         <label for="NumberOfObstaclesSelect">Obstacles:</label>
         <select id="NumberOfObstaclesSelect" onchange="updateObstacles()">
@@ -422,7 +427,7 @@
     let gameOver = false;
     let gameStarted = false;
     let gameOverMessage = "";
-    let startButton, restartButton, controls, modeSelect, AIspeedSelect, GameSpeedSelect, NumberOfObstaclesSelect, RulesButton, soundButton;
+    let startButton, restartButton, controls, modeSelect, AIspeedSelect, GameSpeedSelect, NumberOfObstaclesSelect, RulesButton, soundButton, SpeedDescreaseSelect;
     let gameMode = "playerVsAI"; // Default game mode
     let superFood;
     let shrinkFood;
@@ -463,6 +468,7 @@
       modeSelect = document.getElementById('modeSelect');
       AIspeedSelect = document.getElementById('AIspeedSelect');
       GameSpeedSelect = document.getElementById('GameSpeedSelect');
+      SpeedDescreaseSelect = document.getElementById('SpeedDescreaseSelect');
       NumberOfObstaclesSelect = document.getElementById('NumberOfObstaclesSelect');
       WinScoreInput = document.getElementById('WinScoreInput');
       RulesButton = document.getElementById('RulesButton');
@@ -522,6 +528,12 @@
       saveSettings();
     }
 
+    function updateSpeedDecrease() {
+      // Remove focus
+      SpeedDescreaseSelect.blur();
+      saveSettings();
+    }
+
     function updateAISpeed() {
       AIspeedSelected = parseInt(AIspeedSelect.value);
       aiUpdateInterval = AIspeedSelected;
@@ -543,7 +555,7 @@
       // Dynamic frameRate based on total score, capped at maximumSpeed
       let baseRate = defaultRate;
       let speedIncrease = floor((playerSnake.score + aiSnake.score) / increaseSpeedOnPoints);
-      if (baseRate + speedIncrease + speedDecrease < 3) {
+      if (baseRate + speedIncrease + speedDecrease < 3 || SpeedDescreaseSelect.value === "0") {
         speedDecrease = 0;
       }
       let newFrameRate = min(baseRate + speedIncrease + speedDecrease, maximumSpeed);
@@ -606,6 +618,7 @@
         modeSelect.style.display = 'block';
         AIspeedSelect.style.display = 'block';
         GameSpeedSelect.style.display = 'block';
+        SpeedDescreaseSelect.style.display = 'block';
         NumberOfObstaclesSelect.style.display = 'block';
         restartButton.style.display = 'none';
         //resetButton.style.display = 'none';
@@ -762,6 +775,7 @@
             gameMode: modeSelect.value,
             aiSpeed: AIspeedSelect.value,
             gameSpeed: GameSpeedSelect.value,
+            SpeedDescreaseSelect: SpeedDescreaseSelect.value,
             numObstacles: NumberOfObstaclesSelect.value,
             winScore: WinScoreInput.value,
             soundEnabled: soundEnabled
@@ -777,6 +791,7 @@
             modeSelect.value = settings.gameMode || 'playerVsAI';
             AIspeedSelect.value = settings.aiSpeed || '2';
             GameSpeedSelect.value = settings.gameSpeed || '2';
+            SpeedDescreaseSelect.value = settings.SpeedDescreaseSelect || '1';
             NumberOfObstaclesSelect.value = settings.numObstacles || '15';
             WinScoreInput.value = settings.winScore || '1000';
             soundEnabled = settings.soundEnabled !== undefined ? settings.soundEnabled : true;
