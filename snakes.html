@@ -350,12 +350,12 @@
         <li><strong>Scoring:</strong>
           <ul>
             <li><strong>Regular Food:</strong> Red apple, +1 point. Plays "eat" sound.</li>
-            <li><strong>Super Food:</strong> Golden, pulsing item, +5 points, grows snake, slows game speed (-2). Disappears after 5 seconds. Plays "ding" sound.</li>
-            <li><strong>Shrink Food:</strong> Pink item, +2 points, shrinks snake to 3 segments, slows game speed (-1). Disappears after 8 seconds. Plays "ding" and "shrink" sounds if shrunk.</li>
+            <li><strong>Super Food:</strong> Golden, pulsing item, +5 points, grows snake, slows game speed (-1). Disappears after 5 seconds. Plays "ding" sound.</li>
+            <li><strong>Shrink Food:</strong> Pink item, +2 points, shrinks snake to 3 segments, slows game speed (-0.5). Disappears after 8 seconds. Plays "ding" and "shrink" sounds if shrunk.</li>
             <li><strong>Mystery Food:</strong> White square with "?", randomly gives:
               <ul>
-                <li><strong>Super Effect:</strong> +5 points, growth, slows game speed (-2). Plays "ding" sound.</li>
-                <li><strong>Shrink Effect:</strong> +2 points, shrinks to 3 segments, slows game speed (-1). Plays "ding" and "shrink" sounds if shrunk.</li>
+                <li><strong>Super Effect:</strong> +5 points, growth, slows game speed (-1). Plays "ding" sound.</li>
+                <li><strong>Shrink Effect:</strong> +2 points, shrinks to 3 segments, slows game speed (-0.5). Plays "ding" and "shrink" sounds if shrunk.</li>
               </ul>
               Disappears after 8 seconds.
             </li>
@@ -543,7 +543,9 @@
       // Dynamic frameRate based on total score, capped at maximumSpeed
       let baseRate = defaultRate;
       let speedIncrease = floor((playerSnake.score + aiSnake.score) / increaseSpeedOnPoints);
-      speedDecrease = 0; // Reset or adjust as needed
+      if (baseRate + speedIncrease + speedDecrease < 3) {
+        speedDecrease = 0;
+      }
       let newFrameRate = min(baseRate + speedIncrease + speedDecrease, maximumSpeed);
       frameRate(newFrameRate);
 
@@ -848,13 +850,13 @@
                 pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${1 * this.scoreMultiplier}`, 'green'));
                 } else if (targetFood.type === 'super') {
                 this.score += 5 * this.scoreMultiplier;
-                speedDecrease += -2;
+                speedDecrease += -1;
                 playSoundIfNotPlaying(yeahSound);
                 superFood.active = false;
                 pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
                 } else if (targetFood.type === 'shrink') {
                 this.score += 2 * this.scoreMultiplier;
-                speedDecrease += -1;
+                speedDecrease += -0.5;
                 playSoundIfNotPlaying(yeahSound);
                 shrinkFood.active = false;
                 pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
@@ -867,12 +869,12 @@
                 mysteryFood.active = false;
                 if (random() < 0.5) {
                     this.score += 5 * this.scoreMultiplier;
-                    speedDecrease += -2;
+                    speedDecrease += -1;
                     playSoundIfNotPlaying(yeahSound);
                     pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
                 } else {
                     this.score += 2 * this.scoreMultiplier;
-                    speedDecrease += -1;
+                    speedDecrease += -0.5;
                     playSoundIfNotPlaying(yeahSound);
                     pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
                     if (this.body.length > 3) {
@@ -904,13 +906,13 @@
                 pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${1 * this.scoreMultiplier}`, 'green'));
             } else if (superFood.active && dist(head[0], head[1], superFood.x, superFood.y) < distThreshold) {
                 this.score += 5 * this.scoreMultiplier;
-                speedDecrease += -2;
+                speedDecrease += -1;
                 playSoundIfNotPlaying(yeahSound);
                 pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
                 superFood.active = false;
             } else if (shrinkFood.active && dist(head[0], head[1], shrinkFood.x, shrinkFood.y) < distThreshold) {
                 this.score += 2 * this.scoreMultiplier;
-                speedDecrease += -1;
+                speedDecrease += -0.5;
                 pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
                 playSoundIfNotPlaying(yeahSound);
                 shrinkFood.active = false;
@@ -923,12 +925,12 @@
                 mysteryFood.active = false;
                 if (random() < 0.5) {
                 this.score += 5 * this.scoreMultiplier;
-                speedDecrease += -2;
+                speedDecrease += -1;
                 playSoundIfNotPlaying(yeahSound);
                 pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
                 } else {
                 this.score += 2 * this.scoreMultiplier;
-                speedDecrease += -1;
+                speedDecrease += -0.5;
                 playSoundIfNotPlaying(yeahSound);
                 pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
                 if (this.body.length > 3) {
@@ -1512,6 +1514,7 @@
       move() {
         let currentTime = millis();
         if (currentTime - this.lastMoved >= moveObstaclesAfter) {
+          speedDecrease = 0;
           this.lastMoved = currentTime;
           this.generate(this.positions.length);
         }
