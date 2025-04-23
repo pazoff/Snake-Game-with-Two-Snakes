@@ -362,12 +362,13 @@
           </ul>
         </li>
         <li><strong>Power-Ups:</strong> Special items with temporary boosts, disappear after 8 seconds. Plays "ding" sound with popup message:
-          <ul>
-            <li><strong>Speed Boost:</strong> Yellow lightning bolt, 50% speed increase for ~100 frames. Shows "Speed Up!"</li>
-            <li><strong>Invincibility:</strong> Blue shield, prevents collisions for ~100 frames. Shows "Invincible!"</li>
-            <li><strong>Score Multiplier:</strong> Purple star, doubles points from food for ~200 frames. Shows "x2 Points!"</li>
-          </ul>
-        </li>
+            <ul>
+              <li><strong>Speed Boost:</strong> Yellow lightning bolt, 50% speed increase for ~100 frames. Shows "Speed Up!"</li>
+              <li><strong>Invincibility:</strong> Blue shield, prevents collisions for ~100 frames. Shows "Invincible!"</li>
+              <li><strong>Score Multiplier:</strong> Purple star, doubles points from food for ~200 frames. Shows "x2 Points!"</li>
+              <li><strong>Teleport:</strong> Green portal, enables the snake to teleport to the closest food item each move for ~10 frames, consuming it immediately. Shows "Teleport Active!" when collected and "Teleported!" each teleport.</li>
+            </ul>
+          </li>
         <li><strong>Settings:</strong> Adjust AI speed, game speed, obstacle count, and winning score via dropdowns. Settings save automatically.</li>
         <li><strong>Reset:</strong> Click "Reset" to reload the page if lagging occurs. Settings are preserved.</li>
         <li><strong>More Help:</strong><br><a style="color: #ffffff;" href="https://github.com/pazoff/Snake-Game-with-Two-Snakes/blob/main/README.md" target="_blank">Snake Game with Two Snakes on GitHub</a></li>
@@ -793,250 +794,314 @@
     }
 
     class Snake {
-            constructor(x, y, dir, color) {
-              this.body = [[x, y]];
-              this.dir = dir;
-              this.color = color;
-              this.score = 0;
-              this.name = "";
-              this.speedBoost = 1;
-              this.speedTimer = 0;
-              this.invincibilityTimer = 0;
-              this.scoreMultiplier = 1;
-              this.multiplierTimer = 0;
+        constructor(x, y, dir, color) {
+            this.body = [[x, y]];
+            this.dir = dir;
+            this.color = color;
+            this.score = 0;
+            this.name = "";
+            this.speedBoost = 1;
+            this.speedTimer = 0;
+            this.invincibilityTimer = 0;
+            this.scoreMultiplier = 1;
+            this.multiplierTimer = 0;
+            this.teleportTimer = 0;
+            this.teleportActive = false;
+            this.teleportDelayTimer = 0; 
+            this.lastFoodSpawnTime = 0; 
+        }
+
+        update() {
+            if (this.speedTimer > 0) {
+            this.speedTimer--;
+            if (this.speedTimer <= 0) this.speedBoost = 1;
+            }
+            if (this.invincibilityTimer > 0) this.invincibilityTimer--;
+            if (this.multiplierTimer > 0) {
+            this.multiplierTimer--;
+            if (this.multiplierTimer <= 0) this.scoreMultiplier = 1;
+            }
+            if (this.teleportTimer > 0) {
+            this.teleportTimer--;
+            if (this.teleportTimer <= 0) this.teleportActive = false;
             }
 
-      update() {
-        if (this.speedTimer > 0) {
-          this.speedTimer--;
-          if (this.speedTimer <= 0) this.speedBoost = 1;
-        }
-        if (this.invincibilityTimer > 0) this.invincibilityTimer--;
-        if (this.multiplierTimer > 0) {
-          this.multiplierTimer--;
-          if (this.multiplierTimer <= 0) this.scoreMultiplier = 1;
-        }
+            if (this.teleportActive) {
+            let foods = [
+                { type: 'super', x: superFood.x, y: superFood.y, active: superFood.active, priority: 4 },
+                { type: 'mystery', x: mysteryFood?.x, y: mysteryFood?.y, active: mysteryFood?.active, priority: 3 },
+                { type: 'shrink', x: shrinkFood.x, y: shrinkFood.y, active: shrinkFood.active, priority: 2 },
+                { type: 'regular', x: food.x, y: food.y, active: true, priority: 1 }
+            ].filter(f => f.active);
 
-        let head = this.body[0].slice();
-        head[0] += this.dir[0] * this.speedBoost;
-        head[1] += this.dir[1] * this.speedBoost;
-        let roundedHead = [Math.floor(head[0]), Math.floor(head[1])];
-        roundedHead[0] = (roundedHead[0] + gridSize) % gridSize;
-        roundedHead[1] = (roundedHead[1] + gridSize) % gridSize;
-        this.body.unshift(roundedHead);
+            if (foods.length > 0) {
+                foods.sort((a, b) => b.priority - a.priority);
+                let targetFood = foods[0];
 
-        // Adjust distance threshold based on speedBoost
-        let distThreshold = this.speedBoost > 1 ? 1.0 : 0.5;
+                let newHead = [targetFood.x, targetFood.y];
+                this.body.unshift(newHead);
 
-        if (dist(head[0], head[1], food.x, food.y) < distThreshold) {
-          this.score += 1 * this.scoreMultiplier;
-          playSoundIfNotPlaying(eatSound);
-          food = new Food();
-          pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${1 * this.scoreMultiplier}`, 'green'));
-        } else if (superFood.active && dist(head[0], head[1], superFood.x, superFood.y) < distThreshold) {
-          this.score += 5 * this.scoreMultiplier;
-          speedDecrease += -2;
-          playSoundIfNotPlaying(yeahSound);
-          pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
-          superFood.active = false;
-        } else if (shrinkFood.active && dist(head[0], head[1], shrinkFood.x, shrinkFood.y) < distThreshold) {
-          this.score += 2 * this.scoreMultiplier;
-          speedDecrease += -1;
-          pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
-          playSoundIfNotPlaying(yeahSound);
-          shrinkFood.active = false;
-          if (this.body.length > 3) {
-            this.body = this.body.slice(0, 3);
-            pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
-            playSoundIfNotPlaying(shrinkSound);
-          }
-        } else if (mysteryFood?.active && dist(head[0], head[1], mysteryFood.x, mysteryFood.y) < distThreshold) {
-          mysteryFood.active = false;
-          if (random() < 0.5) {
-            this.score += 5 * this.scoreMultiplier;
-            speedDecrease += -2;
-            playSoundIfNotPlaying(yeahSound);
-            pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
-          } else {
-            this.score += 2 * this.scoreMultiplier;
-            speedDecrease += -1;
-            playSoundIfNotPlaying(yeahSound);
-            pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
-            if (this.body.length > 3) {
-              this.body = this.body.slice(0, 3);
-              pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
-              playSoundIfNotPlaying(shrinkSound);
+                if (targetFood.type === 'regular') {
+                this.score += 1 * this.scoreMultiplier;
+                playSoundIfNotPlaying(eatSound);
+                food = new Food();
+                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${1 * this.scoreMultiplier}`, 'green'));
+                } else if (targetFood.type === 'super') {
+                this.score += 5 * this.scoreMultiplier;
+                speedDecrease += -2;
+                playSoundIfNotPlaying(yeahSound);
+                superFood.active = false;
+                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                } else if (targetFood.type === 'shrink') {
+                this.score += 2 * this.scoreMultiplier;
+                speedDecrease += -1;
+                playSoundIfNotPlaying(yeahSound);
+                shrinkFood.active = false;
+                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                if (this.body.length > 3) {
+                    this.body = this.body.slice(0, 3);
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                    playSoundIfNotPlaying(shrinkSound);
+                }
+                } else if (targetFood.type === 'mystery') {
+                mysteryFood.active = false;
+                if (random() < 0.5) {
+                    this.score += 5 * this.scoreMultiplier;
+                    speedDecrease += -2;
+                    playSoundIfNotPlaying(yeahSound);
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                } else {
+                    this.score += 2 * this.scoreMultiplier;
+                    speedDecrease += -1;
+                    playSoundIfNotPlaying(yeahSound);
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                    if (this.body.length > 3) {
+                    this.body = this.body.slice(0, 3);
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                    playSoundIfNotPlaying(shrinkSound);
+                    }
+                }
+                }
+                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} Teleported!`, 'green'));
+            } else {
+                this.body.pop();
             }
-          }
-        } else if (powerUp.active && dist(head[0], head[1], powerUp.x, powerUp.y) < distThreshold) {
-          powerUp.applyEffect(this);
-          playSoundIfNotPlaying(yeahSound);
-          powerUp.active = false;
-        } else {
-          this.body.pop();
-        }
-      }
+            } else {
+            let head = this.body[0].slice();
+            head[0] += this.dir[0] * this.speedBoost;
+            head[1] += this.dir[1] * this.speedBoost;
+            let roundedHead = [Math.floor(head[0]), Math.floor(head[1])];
+            roundedHead[0] = (roundedHead[0] + gridSize) % gridSize;
+            roundedHead[1] = (roundedHead[1] + gridSize) % gridSize;
+            this.body.unshift(roundedHead);
 
-      updateAI() {
-        let head = this.body[0];
-        let targetX = food.x;
-        let targetY = food.y;
-        let priority = 1;
+            let distThreshold = this.speedBoost > 1 ? 1.0 : 0.5;
 
-        if (powerUp.active) {
-          targetX = powerUp.x;
-          targetY = powerUp.y;
-          priority = 4;
-        } else if (mysteryFood.active) {
-          targetX = mysteryFood.x;
-          targetY = mysteryFood.y;
-          priority = 3;
-        } else if (shrinkFood.active) {
-          targetX = shrinkFood.x;
-          targetY = shrinkFood.y;
-          priority = 2;
-        } else if (superFood.active) {
-          targetX = superFood.x;
-          targetY = superFood.y;
-          priority = 1.5;
-        }
-
-        let dx = targetX - head[0];
-        let dy = targetY - head[1];
-        let newDir = this.dir.slice();
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-          newDir = dx > 0 ? [1, 0] : [-1, 0];
-        } else {
-          newDir = dy > 0 ? [0, 1] : [0, -1];
-        }
-
-        if (this.isValidMove(newDir)) {
-          this.dir = newDir;
-        } else {
-          let possibleDirs = this.getValidDirections(head);
-          if (possibleDirs.length > 0) {
-            this.dir = random(possibleDirs);
-          }
-        }
-
-        this.update();
-      }
-
-      getValidDirections(head) {
-        let directions = [
-          [1, 0],
-          [-1, 0],
-          [0, 1],
-          [0, -1]
-        ];
-
-        let validDirs = [];
-        for (let dir of directions) {
-          if (this.isValidMove(dir)) {
-            validDirs.push(dir);
-          }
-        }
-        return validDirs;
-      }
-
-      isValidMove(dir) {
-        let head = this.body[0];
-        let next = [head[0] + dir[0], head[1] + dir[1]];
-        next[0] = (next[0] + gridSize) % gridSize;
-        next[1] = (next[1] + gridSize) % gridSize;
-
-        // Check collision with own body
-        if (this.invincibilityTimer <= 0 && this.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
-          return false;
+            if (dist(head[0], head[1], food.x, food.y) < distThreshold) {
+                this.score += 1 * this.scoreMultiplier;
+                playSoundIfNotPlaying(eatSound);
+                food = new Food();
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${1 * this.scoreMultiplier}`, 'green'));
+            } else if (superFood.active && dist(head[0], head[1], superFood.x, superFood.y) < distThreshold) {
+                this.score += 5 * this.scoreMultiplier;
+                speedDecrease += -2;
+                playSoundIfNotPlaying(yeahSound);
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                superFood.active = false;
+            } else if (shrinkFood.active && dist(head[0], head[1], shrinkFood.x, shrinkFood.y) < distThreshold) {
+                this.score += 2 * this.scoreMultiplier;
+                speedDecrease += -1;
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                playSoundIfNotPlaying(yeahSound);
+                shrinkFood.active = false;
+                if (this.body.length > 3) {
+                this.body = this.body.slice(0, 3);
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                playSoundIfNotPlaying(shrinkSound);
+                }
+            } else if (mysteryFood?.active && dist(head[0], head[1], mysteryFood.x, mysteryFood.y) < distThreshold) {
+                mysteryFood.active = false;
+                if (random() < 0.5) {
+                this.score += 5 * this.scoreMultiplier;
+                speedDecrease += -2;
+                playSoundIfNotPlaying(yeahSound);
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                } else {
+                this.score += 2 * this.scoreMultiplier;
+                speedDecrease += -1;
+                playSoundIfNotPlaying(yeahSound);
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                if (this.body.length > 3) {
+                    this.body = this.body.slice(0, 3);
+                    pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                    playSoundIfNotPlaying(shrinkSound);
+                }
+                }
+            } else if (powerUp.active && dist(head[0], head[1], powerUp.x, powerUp.y) < distThreshold) {
+                powerUp.applyEffect(this);
+                playSoundIfNotPlaying(yeahSound);
+                powerUp.active = false;
+            } else {
+                this.body.pop();
+            }
+            }
         }
 
-        // Check collision with obstacles
-        if (this.invincibilityTimer <= 0 && obstacles.positions.some(obstacle => obstacle[0] === next[0] && obstacle[1] === next[1])) {
-          return false;
+        updateAI() {
+            let head = this.body[0];
+            let targetX = food.x;
+            let targetY = food.y;
+            let priority = 1;
+
+            if (powerUp.active) {
+            if (powerUp.type === 'teleport') {
+                targetX = powerUp.x;
+                targetY = powerUp.y;
+                priority = 5;
+            } else {
+                targetX = powerUp.x;
+                targetY = powerUp.y;
+                priority = 4;
+            }
+            } else if (mysteryFood.active) {
+            targetX = mysteryFood.x;
+            targetY = mysteryFood.y;
+            priority = 3;
+            } else if (shrinkFood.active) {
+            targetX = shrinkFood.x;
+            targetY = shrinkFood.y;
+            priority = 2;
+            } else if (superFood.active) {
+            targetX = superFood.x;
+            targetY = superFood.y;
+            priority = 1.5;
+            }
+
+            let dx = targetX - head[0];
+            let dy = targetY - head[1];
+            let newDir = this.dir.slice();
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+            newDir = dx > 0 ? [1, 0] : [-1, 0];
+            } else {
+            newDir = dy > 0 ? [0, 1] : [0, -1];
+            }
+
+            if (this.isValidMove(newDir)) {
+            this.dir = newDir;
+            } else {
+            let possibleDirs = this.getValidDirections(head);
+            if (possibleDirs.length > 0) {
+                this.dir = random(possibleDirs);
+            }
+            }
+
+            this.update();
         }
 
-        // Check collision with other snake
-        if (this.invincibilityTimer <= 0) {
-          if (this.color === 'red' && playerSnake.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
+        getValidDirections(head) {
+            let directions = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+            ];
+
+            let validDirs = [];
+            for (let dir of directions) {
+            if (this.isValidMove(dir)) {
+                validDirs.push(dir);
+            }
+            }
+            return validDirs;
+        }
+
+        isValidMove(dir) {
+            let head = this.body[0];
+            let next = [head[0] + dir[0], head[1] + dir[1]];
+            next[0] = (next[0] + gridSize) % gridSize;
+            next[1] = (next[1] + gridSize) % gridSize;
+
+            if (this.invincibilityTimer <= 0 && this.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
             return false;
-          }
-          if (this.color === 'blue' && aiSnake.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
+            }
+
+            if (this.invincibilityTimer <= 0 && obstacles.positions.some(obstacle => obstacle[0] === next[0] && obstacle[1] === next[1])) {
             return false;
-          }
+            }
+
+            if (this.invincibilityTimer <= 0) {
+            if (this.color === 'red' && playerSnake.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
+                return false;
+            }
+            if (this.color === 'blue' && aiSnake.body.some(segment => segment[0] === next[0] && segment[1] === next[1])) {
+                return false;
+            }
+            }
+
+            if (next[0] === floor(cannon.x) && next[1] === floor(cannon.y)) {
+            return false;
+            }
+
+            for (let proj of cannon.projectiles) {
+            let px = floor(proj.x);
+            let py = floor(proj.y);
+            if (next[0] === px && next[1] === py) {
+                return false;
+            }
+            let fx = floor(proj.x + proj.dx);
+            let fy = floor(proj.y + proj.dy);
+            if (next[0] === fx && next[1] === fy) {
+                return false;
+            }
+            }
+
+            return true;
         }
 
-        // Check collision with cannon (using floor to align with grid)
-        if (next[0] === floor(cannon.x) && next[1] === floor(cannon.y)) {
-          return false;
-        }
+  show() {
+    for (let i = 0; i < this.body.length; i++) {
+      const [x, y] = this.body[i];
+      const px = x * tileSize;
+      const py = y * tileSize;
 
-        // Check collision with cannon projectiles
-        for (let proj of cannon.projectiles) {
-          let px = floor(proj.x);
-          let py = floor(proj.y);
-          if (next[0] === px && next[1] === py) {
-            return false;
-          }
-          let fx = floor(proj.x + proj.dx);
-          let fy = floor(proj.y + proj.dy);
-          if (next[0] === fx && next[1] === fy) {
-            return false;
-          }
-        }
-
-        return true;
+      if (i === 0) {
+        fill(this.color);
+        noStroke();
+        const half = tileSize / 2;
+        push();
+        translate(px + half, py + half);
+        rotate(this.dirToAngle(this.dir));
+        beginShape();
+        vertex(0, -half);
+        vertex(-half, half);
+        vertex(half, half);
+        endShape(CLOSE);
+        pop();
+      } else {
+        noStroke();
+        fill(this.color);
+        rect(px + 1, py + 1, tileSize - 2, tileSize - 2);
       }
 
-      show() {
-        for (let i = 0; i < this.body.length; i++) {
-          const [x, y] = this.body[i];
-          const px = x * tileSize;
-          const py = y * tileSize;
-
-          if (i === 0) {
-            // Head as triangle
-            fill(this.color);
-            noStroke();
-
-            const half = tileSize / 2;
-
-            push();
-            translate(px + half, py + half);
-            rotate(this.dirToAngle(this.dir));
-
-            beginShape();
-            vertex(0, -half); // top
-            vertex(-half, half); // bottom-left
-            vertex(half, half); // bottom-right
-            endShape(CLOSE);
-            pop();
-          } else {
-                  noStroke();
-                  fill(this.color);
-                  rect(px+1, py+1, tileSize-2, tileSize-2);
-                  }
-
-          if (this.invincibilityTimer > 0) {
-            push();
-            noFill();
-            stroke(0, 0, 0, 120);
-            strokeWeight(2);
-            ellipse(px + tileSize / 2, py + tileSize / 2, tileSize * 1.1);
-            pop();
-          }
-        }
+      if (this.invincibilityTimer > 0 || this.teleportActive) {
+        push();
+        noFill();
+        stroke(this.teleportActive ? 'green' : 0, 0, 0, 120);
+        strokeWeight(2);
+        ellipse(px + tileSize / 2, py + tileSize / 2, tileSize * 1.1);
+        pop();
       }
-
-      dirToAngle(dir) {
-        if (dir[0] === 1) return HALF_PI; // Right
-        if (dir[0] === -1) return -HALF_PI; // Left
-        if (dir[1] === 1) return PI; // Down
-        return 0; // Up
-      }
-
-      
     }
+  }
+
+  dirToAngle(dir) {
+    if (dir[0] === 1) return HALF_PI;
+    if (dir[0] === -1) return -HALF_PI;
+    if (dir[1] === 1) return PI;
+    return 0;
+  }
+}
 
     class Cannon {
   constructor() {
@@ -1292,72 +1357,81 @@
     }
 
     class PowerUp {
-      constructor() {
-        this.types = ['speed', 'invincibility', 'multiplier'];
-        this.type = random(this.types);
-        this.x = floor(random(gridSize));
-        this.y = floor(random(gridSize));
-        this.active = true;
-        this.spawnTime = millis();
-        this.duration = 8000;
-        this.pulseTime = 0;
-      }
-
-      update() {
-        if (this.active && millis() - this.spawnTime > this.duration) {
-          this.active = false;
+        constructor() {
+            this.types = ['speed', 'invincibility', 'multiplier', 'teleport'];
+            this.type = random(this.types);
+            this.x = floor(random(gridSize));
+            this.y = floor(random(gridSize));
+            this.active = true;
+            this.spawnTime = millis();
+            this.duration = 8000;
+            this.pulseTime = 0;
         }
-        this.pulseTime += 0.15;
-      }
 
-      show() {
-        if (!this.active) return;
-        let scale = sin(this.pulseTime) * 0.5 + 1.2;
-        push();
-        noStroke();
-        if (this.type === 'speed') {
-          ///*
-          fill(255, 255, 0);
-          triangle(
-            this.x * tileSize + tileSize * 0.3, this.y * tileSize + tileSize * 0.7,
-            this.x * tileSize + tileSize * 0.5, this.y * tileSize + tileSize * 0.3,
-            this.x * tileSize + tileSize * 0.7, this.y * tileSize + tileSize * 0.7
-          );
-          //*/
-        } else if (this.type === 'invincibility') {
-          fill(0, 0, 255);
-          ellipse(this.x * tileSize + tileSize / 2, this.y * tileSize + tileSize / 2, tileSize * scale);
-        } else if (this.type === 'multiplier') {
-          fill(128, 0, 128);
-          beginShape();
-          for (let i = 0; i < 5; i++) {
-            let angle = TWO_PI / 5 * i;
-            let r = tileSize * 0.5 * scale;
-            vertex(this.x * tileSize + tileSize / 2 + r * cos(angle), this.y * tileSize + tileSize / 2 + r * sin(angle));
-            angle += TWO_PI / 10;
-            r = tileSize * 0.25 * scale;
-            vertex(this.x * tileSize + tileSize / 2 + r * cos(angle), this.y * tileSize + tileSize / 2 + r * sin(angle));
-          }
-          endShape(CLOSE);
+        update() {
+            if (this.active && millis() - this.spawnTime > this.duration) {
+            this.active = false;
+            }
+            this.pulseTime += 0.15;
         }
-        pop();
-      }
 
-      applyEffect(snake) {
-        if (this.type === 'speed') {
-          snake.speedBoost = 1.5;
-          snake.speedTimer = 100;
-          pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} Speed Up!`, '#4B0082'));
-        } else if (this.type === 'invincibility') {
-          snake.invincibilityTimer = 100;
-          pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} Invincible!`, 'blue'));
-        } else if (this.type === 'multiplier') {
-          snake.scoreMultiplier = 2;
-          snake.multiplierTimer = 200;
-          pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} x2 Points!`, 'purple'));
+        show() {
+            if (!this.active) return;
+            let scale = sin(this.pulseTime) * 0.5 + 1.2;
+            push();
+            noStroke();
+            if (this.type === 'speed') {
+            fill(255, 255, 0);
+            triangle(
+                this.x * tileSize + tileSize * 0.3, this.y * tileSize + tileSize * 0.7,
+                this.x * tileSize + tileSize * 0.5, this.y * tileSize + tileSize * 0.3,
+                this.x * tileSize + tileSize * 0.7, this.y * tileSize + tileSize * 0.7
+            );
+            } else if (this.type === 'invincibility') {
+            fill(0, 0, 255);
+            ellipse(this.x * tileSize + tileSize / 2, this.y * tileSize + tileSize / 2, tileSize * scale);
+            } else if (this.type === 'multiplier') {
+            fill(128, 0, 128);
+            beginShape();
+            for (let i = 0; i < 5; i++) {
+                let angle = TWO_PI / 5 * i;
+                let r = tileSize * 0.5 * scale;
+                vertex(this.x * tileSize + tileSize / 2 + r * cos(angle), this.y * tileSize + tileSize / 2 + r * sin(angle));
+                angle += TWO_PI / 10;
+                r = tileSize * 0.25 * scale;
+                vertex(this.x * tileSize + tileSize / 2 + r * cos(angle), this.y * tileSize + tileSize / 2 + r * sin(angle));
+            }
+            endShape(CLOSE);
+            } else if (this.type === 'teleport') {
+            fill(0, 255, 0);
+            ellipse(this.x * tileSize + tileSize / 2, this.y * tileSize + tileSize / 2, tileSize * scale);
+            stroke(255, 255, 255, 100);
+            strokeWeight(2);
+            noFill();
+            ellipse(this.x * tileSize + tileSize / 2, this.y * tileSize + tileSize / 2, tileSize * scale * 0.8);
+            }
+            pop();
         }
-      }
-    }
+
+        applyEffect(snake) {
+            if (this.type === 'speed') {
+            snake.speedBoost = 1.5;
+            snake.speedTimer = 100;
+            pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} Speed Up!`, '#4B0082'));
+            } else if (this.type === 'invincibility') {
+            snake.invincibilityTimer = 100;
+            pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} Invincible!`, 'blue'));
+            } else if (this.type === 'multiplier') {
+            snake.scoreMultiplier = 2;
+            snake.multiplierTimer = 200;
+            pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} x2 Points!`, 'purple'));
+            } else if (this.type === 'teleport') {
+            snake.teleportActive = true;
+            snake.teleportTimer = 10;
+            pointPopups.push(new PointPopup((this.x + 0.5) * tileSize, (this.y + 0.5) * tileSize, `${snake.name} Activated Teleportation!`, 'green'));
+            }
+        }
+        }
 
     class Obstacles {
       constructor() {
