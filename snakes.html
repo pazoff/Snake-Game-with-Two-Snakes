@@ -166,101 +166,135 @@
     #restartButton, #resetButton {
       background-color: #f44336;
     }
+
+    /* Styles for toggleable controls container */
+    #controls-container {
+      max-width: 600px;
+      margin: 20px auto;
+      font-family: sans-serif;
+    }
+    #toggleControlsButton {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #toggleControlsButton:hover {
+      background: #0056b3;
+    }
+    #controlsTable {
+      padding: 10px;
+      margin-top: 10px;
+      background: #1e1e1e;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: white;
+      display: none; /* Initially hidden */
+      transition: all 0.3s ease;
+    }
   </style>
 </head>
 <body>
-  <!-- Controls Table -->
-  <div id="controlsTable" class="controls-table">
-    <div class="controls-row">
-      <label for="modeSelect">Mode:</label>
-      <select id="modeSelect" onchange="updateGameMode()">
-        <option value="playerVsAI">Player vs AI</option>
-        <option value="AIVsAI">AI vs AI</option>
-      </select>
-      <label for="AIspeedSelect">AI Speed:</label>
-      <select id="AIspeedSelect" onchange="updateAISpeed()">
-        <option value="6">Zombi</option>
-        <option value="5">Stoned</option>
-        <option value="4">Slowest</option>
-        <option value="3">Slower</option>
-        <option value="2" selected>Normal</option>
-        <option value="1">Fast</option>
-        <option value="0">Faster</option>
-      </select>
-      <label for="GameSpeedSelect">Game Speed:</label>
-      <select id="GameSpeedSelect" onchange="updateGameSpeed()">
-        <option value="1">1</option>
-        <option value="2" selected>2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="11">11</option>
-        <option value="12">12</option>
-        <option value="13">13</option>
-        <option value="14">14</option>
-        <option value="15">15</option>
-        <option value="16">16</option>
-        <option value="17">17</option>
-        <option value="18">18</option>
-        <option value="19">19</option>
-        <option value="20">20</option>
-        <option value="21">21</option>
-        <option value="22">22</option>
-        <option value="23">23</option>
-        <option value="24">24</option>
-        <option value="25">25</option>
-        <option value="26">26</option>
-        <option value="27">27</option>
-        <option value="28">28</option>
-        <option value="29">29</option>
-        <option value="30">30</option>
-        <option value="31">31</option>
-        <option value="32">32</option>
-        <option value="33">33</option>
-        <option value="34">34</option>
-        <option value="35">35</option>
-        <option value="36">36</option>
-        <option value="37">37</option>
-        <option value="38">38</option>
-        <option value="39">39</option>
-        <option value="40">40</option>
-      </select>
-      <label for="NumberOfObstaclesSelect">Obstacles:</label>
-      <select id="NumberOfObstaclesSelect" onchange="updateObstacles()">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
-        <option value="25">25</option>
-        <option value="30">30</option>
-        <option value="35">35</option>
-        <option value="40">40</option>
-        <option value="45">45</option>
-        <option value="50">50</option>
-        <option value="55">55</option>
-        <option value="60">60</option>
-        <option value="65">65</option>
-        <option value="70">70</option>
-        <option value="75">75</option>
-        <option value="80">80</option>
-        <option value="85">85</option>
-        <option value="90">90</option>
-        <option value="95">95</option>
-        <option value="100">100</option>
-      </select>
-      <label for="WinScoreInput">Winning Score:</label>
-      <input type="number" id="WinScoreInput" name="WinScoreInput" min="1" step="1" value="1000" />
-    </div>
-    <div class="controls-row">
-      <button id="startButton" onclick="startGame()">New Game</button>
-      <button id="muteButton" onclick="toggleSound()">Sound On</button>
-      <button id="restartButton" onclick="restartGame()">Restart Game</button>
-      <button title="Reloads the web page. Click if you experience lagging during gameplay." id="resetButton" onclick="resetGame()">Reset</button>
+  <!-- Toggleable Controls Container -->
+  <div id="controls-container">
+    <button id="toggleControlsButton">Show Controls</button>
+    <div id="controlsTable" class="controls-table">
+      <div class="controls-row">
+        <label for="modeSelect">Mode:</label>
+        <select id="modeSelect" onchange="updateGameMode()">
+          <option value="playerVsAI">Player vs AI</option>
+          <option value="AIVsAI">AI vs AI</option>
+        </select>
+        <label for="AIspeedSelect">AI Speed:</label>
+        <select id="AIspeedSelect" onchange="updateAISpeed()">
+          <option value="6">Zombi</option>
+          <option value="5">Stoned</option>
+          <option value="4">Slowest</option>
+          <option value="3">Slower</option>
+          <option value="2" selected>Normal</option>
+          <option value="1">Fast</option>
+          <option value="0">Faster</option>
+        </select>
+        <label for="GameSpeedSelect">Game Speed:</label>
+        <select id="GameSpeedSelect" onchange="updateGameSpeed()">
+          <option value="1">1</option>
+          <option value="2" selected>2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+          <option value="14">14</option>
+          <option value="15">15</option>
+          <option value="16">16</option>
+          <option value="17">17</option>
+          <option value="18">18</option>
+          <option value="19">19</option>
+          <option value="20">20</option>
+          <option value="21">21</option>
+          <option value="22">22</option>
+          <option value="23">23</option>
+          <option value="24">24</option>
+          <option value="25">25</option>
+          <option value="26">26</option>
+          <option value="27">27</option>
+          <option value="28">28</option>
+          <option value="29">29</option>
+          <option value="30">30</option>
+          <option value="31">31</option>
+          <option value="32">32</option>
+          <option value="33">33</option>
+          <option value="34">34</option>
+          <option value="35">35</option>
+          <option value="36">36</option>
+          <option value="37">37</option>
+          <option value="38">38</option>
+          <option value="39">39</option>
+          <option value="40">40</option>
+        </select>
+        <label for="NumberOfObstaclesSelect">Obstacles:</label>
+        <select id="NumberOfObstaclesSelect" onchange="updateObstacles()">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="30">30</option>
+          <option value="35">35</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+          <option value="50">50</option>
+          <option value="55">55</option>
+          <option value="60">60</option>
+          <option value="65">65</option>
+          <option value="70">70</option>
+          <option value="75">75</option>
+          <option value="80">80</option>
+          <option value="85">85</option>
+          <option value="90">90</option>
+          <option value="95">95</option>
+          <option value="100">100</option>
+        </select>
+        <label for="WinScoreInput">Winning Score:</label>
+        <input type="number" id="WinScoreInput" name="WinScoreInput" min="1" step="1" value="1000" />
+      </div>
+      <div class="controls-row">
+        <button id="startButton" onclick="startGame()">New Game</button>
+        <button id="muteButton" onclick="toggleSound()">Sound On</button>
+        <button id="restartButton" onclick="restartGame()">Restart Game</button>
+        <button title="Reloads the web page. Click if you experience lagging during gameplay." id="resetButton" onclick="resetGame()">Reset</button>
+      </div>
     </div>
   </div>  
   <div id="gameContainer">
@@ -278,7 +312,6 @@
     <button onclick="toggleRules()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
       Help
     </button>
-
     <div id="rules" style="padding: 10px; margin-top: 10px; background: #1e1e1e; border: 1px solid #444; border-radius: 8px; color: white; display: none;">
       <h2 style="text-align:center;">Playing Rules</h2>
       <ul style="line-height: 1.6;">
@@ -329,11 +362,23 @@
     </div>
   </div>
   
-  <!-- Rules toggle script -->
+  <!-- Rules and Controls toggle script -->
   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const controlsTable = document.getElementById('controlsTable');
+      const toggleControlsButton = document.getElementById('toggleControlsButton');
+      let isControlsVisible = false;
+
+      toggleControlsButton.addEventListener('click', function() {
+        isControlsVisible = !isControlsVisible;
+        controlsTable.style.display = isControlsVisible ? 'block' : 'none';
+        toggleControlsButton.textContent = isControlsVisible ? 'Hide Controls' : 'Show Controls';
+      });
+    });
+
     function toggleRules() {
-      const rules = document.getElementById("rules");
-      rules.style.display = rules.style.display === "none" ? "block" : "none";
+      const rules = document.getElementById('rules');
+      rules.style.display = rules.style.display === 'none' ? 'block' : 'none';
     }
   </script>
 
