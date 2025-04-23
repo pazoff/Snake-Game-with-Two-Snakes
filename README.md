@@ -262,7 +262,7 @@ Below is a detailed description of the key functions in the game, grouped by cat
 This project is open-source under the [MIT License](LICENSE). Feel free to fork, modify, and distribute.
 
 ## Credits
-- **Developed by**: [Pazoff]
+- **Developed by**: [Pazoff](https://github.com/pazoff)
 - **Framework**: p5.js by the Processing Foundation
 - **Sound Effects**: [Public Domain]
 
