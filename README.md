@@ -1,9 +1,10 @@
-# Snake Game with Two Snakes and Extra Features - Manual
+# Snake Game with Two Snakes and Extra Features
 
 ## Overview
 This is a modern take on the classic Snake game, built using [p5.js](https://p5js.org/). The game features two snakes (one player-controlled and one AI-controlled or both AI-controlled), dynamic obstacles, a central cannon, various food types, and power-ups. It supports both desktop (keyboard controls) and mobile (on-screen buttons) gameplay, with customizable settings and sound effects. The game is designed to be engaging with strategic elements, such as score penalties for collisions, temporary boosts from power-ups, and a cannon that interacts with the snakes.
 
-<a href="https://pazoff.github.io/Snake-Game-with-Two-Snakes/" target="_blank">Play the Snake Game with Two Snakes</a>
+[Play the Snake Game with Two Snakes](https://pazoff.github.io/Snake-Game-with-Two-Snakes/)  
+👉 Tip: Right-click the link and choose "Open link in new tab", or hold **Ctrl** (Windows/Linux) or **Cmd** (Mac) while clicking to open in a new tab.
 
 [![Watch the Demo](thumbnail.png)](https://youtu.be/7qOhsr7XG3Y)
 
