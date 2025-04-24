@@ -498,6 +498,8 @@
       speedDecrease = 0;
       pointPopups = [];
       isAnySoundPlaying = false;
+      paused = false;
+      textStyle(NORMAL);
       loadSettings();
     }
 
@@ -565,7 +567,14 @@
         // Update frame rate to stop or resume animations
         if (paused) {
           frameRate(0); // Stop updates
+          // Display paused message
+          textSize(clamp(12, 3 * tileSize, 22));
+          textAlign(CENTER);
+          textStyle(BOLD);
+          fill(0);
+          text("GAME PAUSED", width / 2, height / 2);
         } else {
+          textStyle(NORMAL);
           let baseRate = defaultRate;
           let speedIncrease = floor((playerSnake.score + aiSnake.score) / increaseSpeedOnPoints);
           let newFrameRate = min(baseRate + speedIncrease + speedDecrease, maximumSpeed);
@@ -630,13 +639,7 @@
           } else {
             controls.style.display = 'none';
           }
-        } else {
-          // Display paused message
-          textSize(clamp(12, 3 * tileSize, 16));
-          textAlign(CENTER);
-          fill(0);
-          text("Paused\nClick canvas to resume", width / 2, height / 2);
-        }
+        } 
       } else if (gameOver) {
         textSize(clamp(12, 3 * tileSize, 16));
         textAlign(CENTER);
