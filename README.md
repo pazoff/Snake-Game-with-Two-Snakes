@@ -278,6 +278,10 @@ Below is a detailed description of the key functions in the game, grouped by cat
 - Add new power-up types (e.g., reverse controls, teleport) or food effects (e.g., score steal).
 - Optimize obstacle generation for high counts to reduce failed attempts.
 
+## Project Roadmap
+
+Check out the detailed **[Project Roadmap](roadmap.md)** for planned features and future development phases.
+
 ## License
 This project is open-source under the [MIT License](LICENSE). Feel free to fork, modify, and distribute.
 
