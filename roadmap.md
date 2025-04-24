@@ -1,4 +1,4 @@
-# ROADMAP.md: Snake Game with Two Snakes - Future Development
+# Snake Game with Two Snakes - Future Development
 
 This document outlines the planned features and improvements for the "Snake Game with Two Snakes and Extra Features" project. The goal is to build upon the existing feature-rich foundation to enhance gameplay versatility, visual appeal, fun, and long-term engagement.
 
