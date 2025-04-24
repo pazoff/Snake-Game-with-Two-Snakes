@@ -376,6 +376,7 @@
           </li>
         <li><strong>Settings:</strong> Adjust AI speed, game speed, obstacle count, and winning score via dropdowns. Settings save automatically.</li>
         <li><strong>Reset:</strong> Click "Reset" to reload the page if lagging occurs. Settings are preserved.</li>
+        <li><strong>Pause:</strong> Click the game canvas to pause or resume the game during play.</li>
         <li><strong>More Help:</strong><br><a style="color: #ffffff;" href="https://github.com/pazoff/Snake-Game-with-Two-Snakes/blob/main/README.md" target="_blank">Snake Game with Two Snakes on GitHub</a></li>
       </ul>
     </div>
@@ -407,7 +408,7 @@
     * Snake Game with Two Snakes and Extra Features
     * Created by Pazoff under MIT License
     * Source: https://github.com/pazoff/Snake-Game-with-Two-Snakes
-    * Version: 1.0.0
+    * Version: 1.0.5
     * Last Updated: April 22, 2025
     * Acknowledgments: Built with p5.js (https://p5js.org/) and p5.sound
     * License: MIT (https://github.com/pazoff/Snake-Game-with-Two-Snakes/blob/main/LICENSE)
@@ -427,6 +428,7 @@
     let gameOver = false;
     let gameStarted = false;
     let gameOverMessage = "";
+    let paused = false;
     let startButton, restartButton, controls, modeSelect, AIspeedSelect, GameSpeedSelect, NumberOfObstaclesSelect, RulesButton, soundButton, SpeedDescreaseSelect;
     let gameMode = "playerVsAI"; // Default game mode
     let superFood;
@@ -549,6 +551,29 @@
       saveSettings(); 
     }
 
+    function mousePressed() {
+      // Check if the click is within the canvas bounds
+      if (
+        gameStarted &&
+        !gameOver &&
+        mouseX >= 0 &&
+        mouseX <= width &&
+        mouseY >= 0 &&
+        mouseY <= height
+      ) {
+        paused = !paused; // Toggle pause state
+        // Update frame rate to stop or resume animations
+        if (paused) {
+          frameRate(0); // Stop updates
+        } else {
+          let baseRate = defaultRate;
+          let speedIncrease = floor((playerSnake.score + aiSnake.score) / increaseSpeedOnPoints);
+          let newFrameRate = min(baseRate + speedIncrease + speedDecrease, maximumSpeed);
+          frameRate(newFrameRate); // Resume with current frame rate
+        }
+      }
+    }
+
     function draw() {
       background(220);
 
@@ -559,54 +584,64 @@
         speedDecrease = 0;
       }
       let newFrameRate = min(baseRate + speedIncrease + speedDecrease, maximumSpeed);
-      frameRate(newFrameRate);
+      if (!paused) {
+        frameRate(newFrameRate); // Only set frame rate if not paused
+      }
 
       if (gameStarted && !gameOver) {
-        food.show();
-        obstacles.move();
-        obstacles.show();
-        superFood.update();
-        superFood.show();
-        shrinkFood.update();
-        shrinkFood.show();
-        mysteryFood?.update();
-        mysteryFood?.show();
-        powerUp.update();
-        powerUp.show();
+        if (!paused) {
+          // Game updates only when not paused
+          food.show();
+          obstacles.move();
+          obstacles.show();
+          superFood.update();
+          superFood.show();
+          shrinkFood.update();
+          shrinkFood.show();
+          mysteryFood?.update();
+          mysteryFood?.show();
+          powerUp.update();
+          powerUp.show();
 
-        cannon.update();
-        cannon.show();
-        checkCannonHits();
+          cannon.update();
+          cannon.show();
+          checkCannonHits();
 
-        if (gameMode === "playerVsAI") {
-          playerSnake.update();
-          aiUpdateInterval = AIspeedSelected;
+          if (gameMode === "playerVsAI") {
+            playerSnake.update();
+            aiUpdateInterval = AIspeedSelected;
+          } else {
+            aiUpdateInterval = AIspeedSelected;
+            playerSnake.updateAI();
+          }
+
+          aiUpdateCounter++;
+          if (aiUpdateCounter >= aiUpdateInterval) {
+            aiSnake.updateAI();
+            aiUpdateCounter = 0;
+          }
+
+          playerSnake.show();
+          aiSnake.show();
+          checkCollisions();
+
+          if (isMobileDevice() && gameMode === "playerVsAI") {
+            controls.style.display = 'grid';
+          } else {
+            controls.style.display = 'none';
+          }
         } else {
-          aiUpdateInterval = AIspeedSelected;
-          playerSnake.updateAI();
-        }
-
-        aiUpdateCounter++;
-        if (aiUpdateCounter >= aiUpdateInterval) {
-          aiSnake.updateAI();
-          aiUpdateCounter = 0;
-        }
-
-        playerSnake.show();
-        aiSnake.show();
-        checkCollisions();
-
-        if (isMobileDevice() && gameMode === "playerVsAI") {
-          controls.style.display = 'grid';
-        } else {
-          controls.style.display = 'none';
+          // Display paused message
+          textSize(clamp(12, 3 * tileSize, 16));
+          textAlign(CENTER);
+          fill(0);
+          text("Paused\nClick canvas to resume", width / 2, height / 2);
         }
       } else if (gameOver) {
         textSize(clamp(12, 3 * tileSize, 16));
         textAlign(CENTER);
         fill(0);
         text(gameOverMessage, width / 2, height / 2);
-        // restartButton.style.display = 'block';
         resetButton.style.display = 'block';
         controls.style.display = 'none';
       } else {
@@ -621,10 +656,10 @@
         SpeedDescreaseSelect.style.display = 'block';
         NumberOfObstaclesSelect.style.display = 'block';
         restartButton.style.display = 'none';
-        //resetButton.style.display = 'none';
         controls.style.display = 'none';
       }
 
+      // Always display scores and speed
       textSize(clamp(12, 3 * tileSize, 12));
       textAlign(LEFT);
 
@@ -647,19 +682,23 @@
       x += textWidth(cannonText) + 20;
 
       fill('rgba(0, 0, 0, 0.6)');
-      let speedText = `Speed: ${floor(frameRate())}`;
+      let speedText = `Speed: ${floor(newFrameRate)}`; // Display calculated speed even when paused
       text(speedText, x, y);
 
-      if (!shrinkFood.active && random() < 0.004) {
-        shrinkFood = new ShrinkFood();
-      }
-      if (!mysteryFood?.active && random() < 0.003) {
-        mysteryFood = new MysteryFood();
-      }
-      if (!powerUp.active && random() < 0.003) {
-        powerUp = new PowerUp();
+      // Spawn new food items only when not paused
+      if (!paused) {
+        if (!shrinkFood.active && random() < 0.004) {
+          shrinkFood = new ShrinkFood();
+        }
+        if (!mysteryFood?.active && random() < 0.003) {
+          mysteryFood = new MysteryFood();
+        }
+        if (!powerUp.active && random() < 0.003) {
+          powerUp = new PowerUp();
+        }
       }
 
+      // Update and show point popups (even when paused to allow animations to complete)
       for (let i = pointPopups.length - 1; i >= 0; i--) {
         pointPopups[i].update();
         pointPopups[i].show();
