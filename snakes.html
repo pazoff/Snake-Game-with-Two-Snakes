@@ -910,16 +910,16 @@
                 speedDecrease += -1;
                 playSoundIfNotPlaying(yeahSound);
                 superFood.active = false;
-                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'green'));
                 } else if (targetFood.type === 'shrink') {
                 this.score += 2 * this.scoreMultiplier;
                 speedDecrease += -0.5;
                 playSoundIfNotPlaying(yeahSound);
                 shrinkFood.active = false;
-                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'green'));
                 if (this.body.length > 3) {
                     this.body = this.body.slice(0, 3);
-                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
                     playSoundIfNotPlaying(shrinkSound);
                 }
                 } else if (targetFood.type === 'mystery') {
@@ -928,15 +928,15 @@
                     this.score += 5 * this.scoreMultiplier;
                     speedDecrease += -1;
                     playSoundIfNotPlaying(yeahSound);
-                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'green'));
                 } else {
                     this.score += 2 * this.scoreMultiplier;
                     speedDecrease += -0.5;
                     playSoundIfNotPlaying(yeahSound);
-                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'green'));
                     if (this.body.length > 3) {
                     this.body = this.body.slice(0, 3);
-                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
                     playSoundIfNotPlaying(shrinkSound);
                     }
                 }
@@ -965,17 +965,17 @@
                 this.score += 5 * this.scoreMultiplier;
                 speedDecrease += -1;
                 playSoundIfNotPlaying(yeahSound);
-                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'green'));
                 superFood.active = false;
             } else if (shrinkFood.active && dist(head[0], head[1], shrinkFood.x, shrinkFood.y) < distThreshold) {
                 this.score += 2 * this.scoreMultiplier;
                 speedDecrease += -0.5;
-                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'green'));
                 playSoundIfNotPlaying(yeahSound);
                 shrinkFood.active = false;
                 if (this.body.length > 3) {
                 this.body = this.body.slice(0, 3);
-                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
                 playSoundIfNotPlaying(shrinkSound);
                 }
             } else if (mysteryFood?.active && dist(head[0], head[1], mysteryFood.x, mysteryFood.y) < distThreshold) {
@@ -984,15 +984,15 @@
                 this.score += 5 * this.scoreMultiplier;
                 speedDecrease += -1;
                 playSoundIfNotPlaying(yeahSound);
-                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'red'));
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${5 * this.scoreMultiplier}`, 'green'));
                 } else {
                 this.score += 2 * this.scoreMultiplier;
                 speedDecrease += -0.5;
                 playSoundIfNotPlaying(yeahSound);
-                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'blue'));
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'green'));
                 if (this.body.length > 3) {
                     this.body = this.body.slice(0, 3);
-                    pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'black'));
+                    pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
                     playSoundIfNotPlaying(shrinkSound);
                 }
                 }
@@ -1029,11 +1029,11 @@
             } else if (shrinkFood.active) {
             targetX = shrinkFood.x;
             targetY = shrinkFood.y;
-            priority = 2;
+            priority = 1.5;
             } else if (superFood.active) {
             targetX = superFood.x;
             targetY = superFood.y;
-            priority = 1.5;
+            priority = 2;
             }
 
             let dx = targetX - head[0];
@@ -1621,7 +1621,8 @@
 
           playerSnake.invincibilityTimer = 30;
           clearPointPopupsKeepRecent();
-          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} Crashed into itself!`, 'red'));
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize - 22, `${playerSnake.name} Crashed into itself!`, 'red'));
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} lost ${halfScore} to ${aiSnake.name}!`, 'red'));
           
           playSoundIfNotPlaying(hitSound);
           return;
@@ -1634,10 +1635,12 @@
           if (soundEnabled) finaleSound.play();
           */
           aiSnake.score = aiSnake.score + playerSnake.score;
+          initialPlayerScore = playerSnake.score;
           playerSnake.score = 0;
           playerSnake.invincibilityTimer = 30;
           clearPointPopupsKeepRecent();
-          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} Crashed into ${aiSnake.name}!`, 'red'));
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize - 22, `${playerSnake.name} Crashed into ${aiSnake.name}!`, 'red'));
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} lost ${initialPlayerScore} to ${aiSnake.name}!`, 'red'));
           
           playSoundIfNotPlaying(hitSound);
           return;
@@ -1656,7 +1659,8 @@
 
           playerSnake.invincibilityTimer = 30;
           clearPointPopupsKeepRecent();
-          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} Crashed into Obstacle!`, 'red'));
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize - 22, `${playerSnake.name} Crashed into Obstacle!`, 'red'));
+          pointPopups.push(new PointPopup((head[0] + 0.5) * tileSize, (head[1] + 0.5) * tileSize, `${playerSnake.name} lost ${stolen} to ${aiSnake.name}!`, 'red'));
           
           playSoundIfNotPlaying(hitSound);
           return;
@@ -1677,7 +1681,8 @@
 
             aiSnake.invincibilityTimer = 30;
             clearPointPopupsKeepRecent();
-            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} Crashed into Obstacle!`, 'red'));
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize - 22, `${aiSnake.name} Crashed into Obstacle!`, '#A47DAB'));
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} lost ${stolen} to ${playerSnake.name}!`, '#A47DAB'));
             
             playSoundIfNotPlaying(hitSound);
             return;
@@ -1690,16 +1695,18 @@
             if (soundEnabled) finaleSound.play();
             */
             playerSnake.score = playerSnake.score + aiSnake.score;
+            initialAiScore = aiSnake.score;
             aiSnake.score = 0;
             
             aiSnake.invincibilityTimer = 30;
             clearPointPopupsKeepRecent();
-            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} Crashed into ${playerSnake.name}!`, 'red'));
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize - 22, `${aiSnake.name} Crashed into ${playerSnake.name}!`, '#734f96'));
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} lost ${initialAiScore} to ${playerSnake.name}!`, '#734f96'));
             
             playSoundIfNotPlaying(hitSound);
             return;
           }
-          if (playerSnake.body.slice(1).some(segment => segment[0] === aiHead[0] && segment[1] === aiHead[1])) {
+          if (aiSnake.body.slice(1).some(segment => segment[0] === aiHead[0] && segment[1] === aiHead[1])) {
             /*
             gameOver = true;
             gameOverMessage = `BOOM! ${aiSnake.name} crashed into itself!`;
@@ -1711,7 +1718,8 @@
             aiSnake.score -= halfScore;
             aiSnake.invincibilityTimer = 30;
             clearPointPopupsKeepRecent();
-            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} Crashed into itself!`, 'red'));
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize - 22, `${aiSnake.name} Crashed into itself!`, '#734f96'));
+            pointPopups.push(new PointPopup((aiHead[0] + 0.5) * tileSize, (aiHead[1] + 0.5) * tileSize, `${aiSnake.name} lost ${halfScore} to ${playerSnake.name}!`, '#734f96'));
             
             playSoundIfNotPlaying(hitSound);
             return;
