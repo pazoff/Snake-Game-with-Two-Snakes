@@ -11,7 +11,9 @@ This is a modern take on the classic Snake game, built using [p5.js](https://p5j
 
 👉 **Watch the Demo**
 
-[![Watch the Demo](thumbnail.png)](https://youtu.be/7qOhsr7XG3Y)
+[Watch the Demo](https://youtu.be/7qOhsr7XG3Y)
+
+<img src="snakes1.gif" width="350">
 
 ## Google Gemini 2.5 Pro Model Review Of The Game
 
