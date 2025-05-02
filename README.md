@@ -3,7 +3,7 @@ Turn ★ into ⭐ (top-right corner) if you like the project!
 
 <a href="https://www.buymeacoffee.com/pazoff" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 190px !important;" ></a>
 
-<img src="snakes.gif" width="350">
+<video src="https://github.com/user-attachments/assets/a69cb216-9d77-4c59-a928-ff80da6804c4" controls="controls">Your browser does not support playing this video!</video>
 
 Get the <a href="https://buymeacoffee.com/pazoff/snake-game-two-snakes-extra-features-extended-version/" target="_blank">Snake Game with Two Snakes and Extra Features - Extended Version</a>
 
