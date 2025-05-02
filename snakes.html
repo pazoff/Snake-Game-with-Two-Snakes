@@ -919,7 +919,7 @@
                 pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'green'));
                 if (this.body.length > 3) {
                     this.body = this.body.slice(0, 3);
-                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrank`, 'blue'));
                     playSoundIfNotPlaying(shrinkSound);
                 }
                 } else if (targetFood.type === 'mystery') {
@@ -936,7 +936,7 @@
                     pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'green'));
                     if (this.body.length > 3) {
                     this.body = this.body.slice(0, 3);
-                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
+                    pointPopups.push(new PointPopup((newHead[0] + 0.5) * tileSize, (newHead[1] + 0.5) * tileSize - 22, `${this.name} shrank`, 'blue'));
                     playSoundIfNotPlaying(shrinkSound);
                     }
                 }
@@ -975,7 +975,7 @@
                 shrinkFood.active = false;
                 if (this.body.length > 3) {
                 this.body = this.body.slice(0, 3);
-                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
+                pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrank`, 'blue'));
                 playSoundIfNotPlaying(shrinkSound);
                 }
             } else if (mysteryFood?.active && dist(head[0], head[1], mysteryFood.x, mysteryFood.y) < distThreshold) {
@@ -992,7 +992,7 @@
                 pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize, `${this.name} +${2 * this.scoreMultiplier}`, 'green'));
                 if (this.body.length > 3) {
                     this.body = this.body.slice(0, 3);
-                    pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrinked`, 'blue'));
+                    pointPopups.push(new PointPopup((roundedHead[0] + 0.5) * tileSize, (roundedHead[1] + 0.5) * tileSize - 22, `${this.name} shrank`, 'blue'));
                     playSoundIfNotPlaying(shrinkSound);
                 }
                 }
