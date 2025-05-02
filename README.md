@@ -298,6 +298,7 @@ This project is open-source under the [MIT License](LICENSE). Feel free to fork,
 - **Developed by**: [Pazoff](https://github.com/pazoff)
 - **Framework**: p5.js by the Processing Foundation
 - **Sound Effects**: [Public Domain]
+- **Background Image**: <a href="http://www.freepik.com">Designed by brgfx / Freepik</a>
 
 For bug reports or feature requests, open an issue on the [GitHub repository](https://github.com/pazoff/Snake-Game-with-Two-Snakes).
 
